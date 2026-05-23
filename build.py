@@ -1,6 +1,4 @@
 import os
-import sys
-
 def build():
     # Read the clean, readable source file
     with open('src/widget.html', 'r', encoding='utf-8') as f:
@@ -23,7 +21,6 @@ def build():
         index_content = f.read()
 
     start_marker = '<div id="space-countdown-widget"'
-    end_marker = '</script></div>'
 
     start_idx = index_content.find(start_marker)
     # The end marker might vary slightly if the user edited it, so we find the closing div after the script
@@ -33,8 +30,8 @@ def build():
         new_index = index_content[:start_idx] + minified + index_content[end_idx:]
         with open('index.html', 'w', encoding='utf-8') as f:
             f.write(new_index)
-        print(f"Successfully minified src/widget.html -> dist/widget.min.html")
-        print(f"Successfully updated index.html with new minified widget code!")
+        print("Successfully minified src/widget.html -> dist/widget.min.html")
+        print("Successfully updated index.html with new minified widget code!")
     else:
         print("Warning: Could not automatically inject into index.html (markers not found).")
         print("Your minified code is ready in dist/widget.min.html")
