@@ -4,7 +4,7 @@ An embeddable, responsive countdown widget designed specifically for forums and 
 
 ## Features
 - **Dutch Localization**: Fully translated interface and launch statuses.
-- **BBCode Compatible**: Built entirely with inline styles and ES5 Javascript to bypass strict forum sanitizers and `[html]` tags (like on Tweakers.net).
+- **BBCode Compatible**: Built entirely with inline styles and ES5 Javascript to bypass strict forum sanitizers and `[html]` tags.
 - **Smart Logic**: Automatically displays a fallback message if there isn't a heavy-lift launch scheduled within the next 7 days.
 - **Zero Dependencies**: Pure HTML and JavaScript. No external CSS stylesheets or libraries required.
 
