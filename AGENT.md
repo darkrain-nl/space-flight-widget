@@ -1,0 +1,20 @@
+# Agent Instructions
+
+Hello fellow AI! If you are tasked with modifying this repository, please read and follow these rules strictly to ensure you do not break the widget's compatibility with forum BBCode parsers.
+
+## Workflow Rules
+1. **Never edit `index.html` or `dist/widget.min.html` directly.** Those files are automatically generated.
+2. **Edit Source Only**: Make all of your code changes (HTML, CSS, JavaScript) inside `src/widget.html`.
+3. **Build the Project**: After modifying `src/widget.html`, you MUST run the build script:
+   ```bash
+   python3 build.py
+   ```
+   This script will minify the code and inject it into the correct distribution files.
+
+## Crucial Technical Constraints
+This widget is designed to be copy-pasted into restrictive forum software using an `[html]...[/html]` BBCode tag.
+
+- **Strict Single-Line Output**: The forum parser automatically injects `<br>` tags for every newline character (`\n`). If there are any newlines inside the `<script>` tags, the injected `<br>` will cause a syntax error (`expected expression, got '<'`) and break the widget. The build script (`build.py`) handles removing newlines, so do not alter its minification logic.
+- **The Smiley Bug (`})`)**: Some forum BBCode parsers will automatically convert the exact sequence `})` into a smiley face image (`<img src="...">`). This breaks JavaScript syntax. When writing JavaScript in `src/widget.html`, you **must** leave a space between closing brackets, like this: `} )`. Do not ever write `})`.
+- **Inline Styles Only**: The forum strips out `<style>...</style>` blocks. All CSS must be written as inline `style="..."` attributes on the HTML elements themselves.
+- **ES5 JavaScript**: To maximize compatibility with strict sanitizers, the JavaScript is written using older ES5 syntax (`var`, `function()`). Avoid modern features like `let`, `const`, arrow functions (`=>`), and optional chaining (`?.`). Avoid `//` comments as they will comment out the rest of the script when minified onto a single line.
