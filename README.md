@@ -6,9 +6,7 @@
 
 An embeddable, responsive countdown widget designed specifically for forums and websites. It automatically fetches the next upcoming heavy-lift rocket launch (Starship, Falcon Heavy, Ariane 6, Long March 5, Angara A5, Proton, etc.) using [The Space Devs API](https://thespacedevs.com/).
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/darkrain-nl/space-flight-widget/main/.github/preview.png" alt="Widget Preview" width="400" onerror="this.style.display='none'"/>
-</div>
+
 
 ## ✨ Features
 - **Dutch Localization**: Fully translated interface and launch statuses.
