@@ -4,7 +4,7 @@
 [![API](https://img.shields.io/badge/API-The%20Space%20Devs-10b981)](https://thespacedevs.com/)
 [![Built with Vanilla JS](https://img.shields.io/badge/JavaScript-Vanilla-f7df1e?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 
-An embeddable, responsive countdown widget designed specifically for forums and websites. It automatically fetches the next upcoming heavy-lift rocket launch (Starship, Falcon Heavy, Ariane 6, Long March 5, Angara A5, Proton, etc.) using [The Space Devs API](https://thespacedevs.com/).
+Embed upcoming heavy-lift rocket launches directly into your forum or website. A lightweight, responsive countdown widget powered by [The Space Devs API](https://thespacedevs.com/). *(Note: The widget interface is currently available in Dutch only).*
 
 
 [![Space Flight Widget Preview](assets/preview.png)](https://darkrain-nl.github.io/space-flight-widget/)
@@ -13,7 +13,7 @@ An embeddable, responsive countdown widget designed specifically for forums and 
 
 
 ## ✨ Features
-- **Dutch Localization**: Fully translated interface and launch statuses.
+- **Dutch Interface**: The interface and launch statuses are currently entirely in Dutch.
 - **BBCode Compatible**: Built entirely with inline styles and ES5 Javascript to bypass strict forum sanitizers and `[html]` tags.
 - **Smart Logic**: Automatically displays a fallback message if there isn't a heavy-lift launch scheduled within the next 7 days.
 - **Auto-Refreshing**: Refreshes data automatically every 5 minutes and recovers from API errors gracefully.
