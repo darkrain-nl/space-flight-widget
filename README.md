@@ -1,27 +1,42 @@
-# Space Flight Widget
+# 🚀 Space Flight Widget
 
-An embeddable, responsive countdown widget designed specifically for forums and websites. It automatically fetches the next upcoming heavy-lift rocket launch (Starship, Falcon Heavy, Ariane 6, etc.) using [The Space Devs API](https://thespacedevs.com/).
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![API](https://img.shields.io/badge/API-The%20Space%20Devs-10b981)](https://thespacedevs.com/)
+[![Built with Vanilla JS](https://img.shields.io/badge/JavaScript-Vanilla-f7df1e?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 
-## Features
+An embeddable, responsive countdown widget designed specifically for forums and websites. It automatically fetches the next upcoming heavy-lift rocket launch (Starship, Falcon Heavy, Ariane 6, Long March 5, Angara A5, Proton, etc.) using [The Space Devs API](https://thespacedevs.com/).
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/darkrain-nl/space-flight-widget/main/.github/preview.png" alt="Widget Preview" width="400" onerror="this.style.display='none'"/>
+</div>
+
+## ✨ Features
 - **Dutch Localization**: Fully translated interface and launch statuses.
 - **BBCode Compatible**: Built entirely with inline styles and ES5 Javascript to bypass strict forum sanitizers and `[html]` tags.
 - **Smart Logic**: Automatically displays a fallback message if there isn't a heavy-lift launch scheduled within the next 7 days.
+- **Auto-Refreshing**: Refreshes data automatically every 5 minutes and recovers from API errors gracefully.
 - **Zero Dependencies**: Pure HTML and JavaScript. No external CSS stylesheets or libraries required.
 
-## How to Edit
-The widget code is minified to a single line to bypass strict forum BBCode sanitizers (which often break scripts by converting newlines into `<br>` tags). To edit the widget:
-1. Make your changes in the clean, human-readable `src/widget.html` file.
-2. Run the build script to compile and minify your code:
+## 🛠️ How to Embed
+Simply copy the raw, single-line code from [`dist/widget.min.html`](dist/widget.min.html) and paste it into your website or forum's HTML embed block (e.g., using `[html]...[/html]`).
+
+## 🤝 How to Contribute
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for important technical rules you need to follow when developing for this widget (like our strict BBCode parsing constraints).
+
+### Quick Start
+1. Fork the repo and clone it locally.
+2. Make your edits in `src/widget.html`. **Do not edit `dist/widget.min.html` or `index.html` directly.**
+3. Run the build script to compile and minify:
    ```bash
    python3 build.py
    ```
-3. The script will generate a single-line minified version in `dist/widget.min.html` and automatically update the `index.html` preview.
+4. Open `index.html` in your browser to preview your changes.
 
-## How to Embed
-Simply copy the raw, single-line code from `dist/widget.min.html` and paste it into your website or forum's HTML embed block (e.g., using `[html]...[/html]`).
+## 📡 Automated Updates
+This repository uses a GitHub Action to automatically monitor and update to the latest version of The Space Devs API. When the API updates, a Pull Request is automatically generated to update the widget.
 
-## Attribution
+## 📜 Attribution
 Launch data is provided by [The Space Devs](https://thespacedevs.com/).
 
-## License
+## ⚖️ License
 MIT License. See `LICENSE` for more information.
