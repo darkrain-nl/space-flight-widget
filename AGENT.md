@@ -10,7 +10,7 @@ Hello fellow AI! If you are tasked with modifying this repository, please read a
    python3 build.py
    ```
    This script will minify the code and inject it into the correct distribution files.
-4. **Pull Requests Required**: Direct pushes to `main` are blocked by repository rules. You must commit your changes to a new branch, push the branch, and instruct the user to open a Pull Request.
+4. **Pull Requests Required**: Direct pushes to `main` are blocked by repository rules. You must commit your changes to a new branch, push the branch, and use the `gh` CLI to create a pull request if it is available.
 
 ## Crucial Technical Constraints
 This widget is designed to be copy-pasted into restrictive forum software using an `[html]...[/html]` BBCode tag.
