@@ -136,10 +136,10 @@
                 var m = Math.floor((dist % 3600000) / 60000);
                 var s = Math.floor((dist % 60000) / 1000);
                 
-                dEl.innerHTML = (d < 10 ? '0' : '') + d;
-                hEl.innerHTML = (h < 10 ? '0' : '') + h;
-                mEl.innerHTML = (m < 10 ? '0' : '') + m;
-                sEl.innerHTML = (s < 10 ? '0' : '') + s;
+                dEl.textContent = (d < 10 ? '0' : '') + d;
+                hEl.textContent = (h < 10 ? '0' : '') + h;
+                mEl.textContent = (m < 10 ? '0' : '') + m;
+                sEl.textContent = (s < 10 ? '0' : '') + s;
             }
 
             fetchLaunch();
