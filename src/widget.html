@@ -45,6 +45,7 @@
             var timerInterval;
 
             function fetchLaunch() {
+                clearInterval(timerInterval);
                 fetch(API_URL)
                     .then(function(res) {
                         if (!res.ok) throw new Error('API error');
@@ -52,6 +53,7 @@
                     } )
                     .then(function(data) {
                         var launch = null;
+                        var now = new Date().getTime();
                         for (var i = 0; i < data.results.length; i++) {
                             var l = data.results[i];
                             var r = '';
@@ -70,7 +72,6 @@
                             }
                             
                             var launchTime = new Date(l.net).getTime();
-                            var now = new Date().getTime();
                             var daysAway = (launchTime - now) / (1000 * 60 * 60 * 24);
                             
                             var isFuture = launchTime > now;
@@ -83,8 +84,8 @@
                         }
 
                         if (launch) {
-                            titleEl.innerHTML = "Aankomende Lancering";
-                            nameEl.innerHTML = launch.name;
+                            titleEl.textContent = "Aankomende Lancering";
+                            nameEl.textContent = launch.name;
                             var statusMap = {
                                 'Go for Launch': 'Klaar voor Lancering',
                                 'To Be Determined': 'Nog te bepalen',
@@ -94,7 +95,7 @@
                             };
                             
                             var rawStatus = (launch.status && launch.status.name) ? launch.status.name : '';
-                            statusEl.innerHTML = statusMap[rawStatus] || rawStatus || 'Onbekende Status';
+                            statusEl.textContent = statusMap[rawStatus] || rawStatus || 'Onbekende Status';
 
                             var statusName = rawStatus.toLowerCase();
                             if (statusName.indexOf('go') === -1 && statusName.indexOf('success') === -1) {
@@ -110,15 +111,17 @@
                             updateTimer();
                             timerInterval = setInterval(updateTimer, 1000);
                         } else {
-                            titleEl.innerHTML = "Geen Lancering Gepland";
-                            nameEl.innerHTML = "Kijk later nog eens";
+                            titleEl.textContent = "Geen Lancering Gepland";
+                            nameEl.textContent = "Kijk later nog eens";
                             timerEl.style.display = 'none';
                             statusEl.style.display = 'none';
                         }
+                        setTimeout(fetchLaunch, 300000);
                     } )
                     .catch(function(e) {
-                        titleEl.innerHTML = "Fout bij laden van gegevens";
-                        nameEl.innerHTML = "Probeer het later opnieuw";
+                        titleEl.textContent = "Fout bij laden van gegevens";
+                        nameEl.textContent = "Probeer het later opnieuw";
+                        setTimeout(fetchLaunch, 30000);
                     } );
             }
 
