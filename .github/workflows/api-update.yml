@@ -32,6 +32,12 @@ jobs:
             echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
             echo "UPDATE_FOUND=true" >> $GITHUB_ENV
 
+            # Extract release notes/announcements
+            EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+            echo "API_ANNOUNCEMENTS<<$EOF" >> $GITHUB_ENV
+            curl -s "https://ll.thespacedevs.com/$LATEST_VERSION/json" | jq -r '.info.description' | awk '/### Announcements/{flag=1; next} /^## /{flag=0} flag' | sed '/^[[:space:]]*$/d' >> $GITHUB_ENV
+            echo "$EOF" >> $GITHUB_ENV
+
             # Update the API URL inside src/widget.html
             sed -i "s/$CURRENT_VERSION/$LATEST_VERSION/g" src/widget.html
           else
@@ -57,6 +63,9 @@ jobs:
           title: 'Update The Space Devs API to v${{ env.LATEST_VERSION }}'
           body: |
             Automatically generated PR to update The Space Devs API from version in source to the newly released **v${{ env.LATEST_VERSION }}**.
+
+            ### 📢 Announcements / Release Notes
+            ${{ env.API_ANNOUNCEMENTS }}
 
             The `build.py` script has been run to update `dist/widget.min.html` and `index.html`.
           branch: chore/update-space-devs-api
