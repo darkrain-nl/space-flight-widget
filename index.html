@@ -55,13 +55,43 @@
                         <option value="nl">Dutch (nl)</option>
                     </select>
                 </div>
-                <div>
-                    <label for="rocket-input"><strong>Rockets (comma separated):</strong></label>
-                    <input type="text" id="rocket-input" value="starship, super heavy, falcon heavy, sls, vulcan, new glenn, ariane 6, long march 5, angara a5, proton" style="width: 300px; padding: 0.5rem; border-radius: 4px; border: 1px solid #cbd5e1;" oninput="updateWidget()">
+                <div style="text-align: left; width: 350px;">
+                    <label><strong>Rockets to Track:</strong></label>
+                    <div style="margin-top: 0.5rem; background: white; padding: 1rem; border-radius: 4px; border: 1px solid #cbd5e1; max-height: 200px; overflow-y: auto; font-size: 0.9rem;">
+                        <div style="font-weight: bold; margin-bottom: 0.25rem; color: #475569;">SpaceX</div>
+                        <label style="display: block; margin-bottom: 0.25rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="starship" onchange="updateWidget()" checked> Starship</label>
+                        <label style="display: block; margin-bottom: 0.25rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="falcon heavy" onchange="updateWidget()" checked> Falcon Heavy</label>
+                        <label style="display: block; margin-bottom: 0.75rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="falcon 9" onchange="updateWidget()"> Falcon 9</label>
+                        
+                        <div style="font-weight: bold; margin-bottom: 0.25rem; color: #475569;">NASA / ULA</div>
+                        <label style="display: block; margin-bottom: 0.25rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="sls" onchange="updateWidget()" checked> Space Launch System (SLS)</label>
+                        <label style="display: block; margin-bottom: 0.25rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="vulcan" onchange="updateWidget()" checked> Vulcan Centaur</label>
+                        <label style="display: block; margin-bottom: 0.75rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="atlas v" onchange="updateWidget()"> Atlas V</label>
+                        
+                        <div style="font-weight: bold; margin-bottom: 0.25rem; color: #475569;">Blue Origin</div>
+                        <label style="display: block; margin-bottom: 0.75rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="new glenn" onchange="updateWidget()" checked> New Glenn</label>
+                        
+                        <div style="font-weight: bold; margin-bottom: 0.25rem; color: #475569;">Arianespace / Europe</div>
+                        <label style="display: block; margin-bottom: 0.25rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="ariane 6" onchange="updateWidget()" checked> Ariane 6</label>
+                        <label style="display: block; margin-bottom: 0.75rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="vega" onchange="updateWidget()"> Vega</label>
+                        
+                        <div style="font-weight: bold; margin-bottom: 0.25rem; color: #475569;">Roscosmos</div>
+                        <label style="display: block; margin-bottom: 0.25rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="angara a5" onchange="updateWidget()" checked> Angara A5</label>
+                        <label style="display: block; margin-bottom: 0.25rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="proton" onchange="updateWidget()" checked> Proton</label>
+                        <label style="display: block; margin-bottom: 0.75rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="soyuz" onchange="updateWidget()"> Soyuz</label>
+                        
+                        <div style="font-weight: bold; margin-bottom: 0.25rem; color: #475569;">CASC / China</div>
+                        <label style="display: block; margin-bottom: 0.25rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="long march 5" onchange="updateWidget()" checked> Long March 5</label>
+                        <label style="display: block; margin-bottom: 0.75rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="long march" onchange="updateWidget()"> All Long March</label>
+                        
+                        <div style="font-weight: bold; margin-bottom: 0.25rem; color: #475569;">Other</div>
+                        <label style="display: block; margin-bottom: 0.25rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="electron" onchange="updateWidget()"> Electron</label>
+                        <label style="display: block; margin-bottom: 0.25rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="h3" onchange="updateWidget()"> H3</label>
+                    </div>
                 </div>
             </div>
             <div style="font-size: 0.8rem; color: #64748b; max-width: 500px;">
-                Specify which rockets to track by name or family (e.g. "starship", "falcon 9"). Leave empty to track all upcoming launches.
+                Check the rockets you want to track. If no rockets are selected, <strong>all</strong> upcoming launches will be tracked.
             </div>
             <div>
                 <button onclick="copyCode()" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Copy Embed Code</button>
@@ -87,7 +117,16 @@
         var currentHtml = '';
         function updateWidget() {
             var lang = document.getElementById('lang-select').value;
-            var rockets = document.getElementById('rocket-input').value;
+            
+            var rocketInputs = document.getElementsByClassName('rocket-cb');
+            var selectedRockets = [];
+            for (var j = 0; j < rocketInputs.length; j++) {
+                if (rocketInputs[j].checked) {
+                    selectedRockets.push(rocketInputs[j].value);
+                }
+            }
+            var rockets = selectedRockets.join(', ');
+
             var widgetContainer = document.getElementById('widget-container');
             
             // Fetch the minified widget so we can inject it fresh
