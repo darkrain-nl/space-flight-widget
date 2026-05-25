@@ -1,10 +1,15 @@
-<div id="space-countdown-widget" data-lang="en" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.5rem; color: white; max-width: 350px; width: 100%; text-align: center; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
-    <img id="space-avatar" src="" style="display: none; width: 64px; height: 64px; border-radius: 50%; object-fit: cover; margin: 0 auto 0.8rem; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);" alt="Rocket Thumbnail">
-    <div id="space-title" style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.8rem; font-weight: 600;">Loading...</div>
-    <a id="space-name" href="#" target="_blank" rel="noopener noreferrer" style="display: inline-block; font-weight: 700; font-size: 1.1rem; margin-bottom: 0.4rem; line-height: 1.3; background: linear-gradient(to right, #fff, #a5b4fc); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none;">--</a>
-    <div id="space-provider-pad" style="font-size: 0.7rem; color: #94a3b8; margin-bottom: 1.2rem; text-transform: uppercase; letter-spacing: 0.5px; display: none;">--</div>
-
-    <div id="space-timer" style="display: none; justify-content: center; gap: 12px; margin-bottom: 1rem;">
+<div id="space-countdown-widget" data-lang="en" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.5rem; color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 1.5rem; flex: 1; min-width: 250px;">
+            <img id="space-avatar" src="" style="display: none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); flex-shrink: 0;" alt="Rocket Thumbnail">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
+                <div id="space-title" style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem; font-weight: 600;">Loading...</div>
+                <a id="space-name" href="#" target="_blank" rel="noopener noreferrer" style="font-weight: 700; font-size: 1.25rem; margin-bottom: 0.4rem; line-height: 1.3; background: linear-gradient(to right, #fff, #a5b4fc); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none;">--</a>
+                <div id="space-provider-pad" style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px; display: none;">--</div>
+                <div id="space-status" style="display: none; font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">--</div>
+            </div>
+        </div>
+        <div id="space-timer" style="display: none; gap: 12px; flex-shrink: 0; margin: 0 auto;">
         <div style="display: flex; flex-direction: column; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5rem; border-radius: 8px; min-width: 50px;">
             <span id="space-d" style="font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 4px;">00</span>
             <span id="space-lbl-d" style="font-size: 0.65rem; color: #94a3b8; letter-spacing: 0.5px;">DAYS</span>
@@ -21,14 +26,11 @@
             <span id="space-s" style="font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 4px;">00</span>
             <span id="space-lbl-s" style="font-size: 0.65rem; color: #94a3b8; letter-spacing: 0.5px;">SECS</span>
         </div>
+        </div>
     </div>
 
-
-
-    <div id="space-status" style="display: none; font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">--</div>
-
-    <div id="space-attribution" style="margin-top: 1.5rem; font-size: 0.65rem;">
-        <a id="space-attr-link" href="https://thespacedevs.com/" target="_blank" rel="noopener noreferrer" style="color: #94a3b8; text-decoration: none;">Data by The Space Devs</a>
+    <div id="space-attribution" style="margin-top: 1.5rem; font-size: 0.65rem; text-align: right; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.8rem;">
+        <a id="space-attr-link" href="https://thespacedevs.com/" target="_blank" rel="noopener noreferrer" style="color: #64748b; text-decoration: none;">Data by The Space Devs</a>
     </div>
 
     <script>
