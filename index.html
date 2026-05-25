@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://ll.thespacedevs.com; style-src 'self' 'unsafe-inline';">
     <title>Embeddable Widget Preview</title>
     <style>
         /* This is just for the preview page, DO NOT copy this into your embed */
@@ -115,6 +116,15 @@
 
     <script>
         var currentHtml = '';
+        function escapeHtml(unsafe) {
+            return (unsafe || '').toString()
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
         function updateWidget() {
             var lang = document.getElementById('lang-select').value;
             
@@ -133,8 +143,12 @@
             fetch('dist/widget.min.html')
                 .then(function(res) { return res.text(); })
                 .then(function(html) {
+                    // Escape inputs to prevent DOM-based XSS when concatenating into the string
+                    var safeLang = escapeHtml(lang);
+                    var safeRockets = escapeHtml(rockets);
+                    
                     // Update data-lang attribute in the string and add data-rockets
-                    html = html.replace('data-lang="en"', 'data-lang="' + lang + '" data-rockets="' + rockets + '"');
+                    html = html.replace('data-lang="en"', 'data-lang="' + safeLang + '" data-rockets="' + safeRockets + '"');
                     currentHtml = html;
                     
                     // Update the textarea code view
@@ -143,7 +157,9 @@
                     // Replace HTML
                     widgetContainer.innerHTML = html;
                     
-                    // Execute scripts inside the new HTML
+                    // SECURITY: This pattern of extracting and manually executing scripts after innerHTML
+                    // is only acceptable here because the HTML source (dist/widget.min.html) is a local,
+                    // trusted file. Never use this pattern to render user-supplied or untrusted HTML.
                     var scripts = widgetContainer.getElementsByTagName('script');
                     for (var i = 0; i < scripts.length; i++) {
                         var newScript = document.createElement('script');
