@@ -154,12 +154,16 @@
                     // Update the textarea code view
                     document.getElementById('code-output').value = html;
                     
-                    // Replace HTML
-                    widgetContainer.innerHTML = html;
+                    // Replace HTML securely using DOMParser to avoid innerHTML vulnerability
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(html, 'text/html');
                     
-                    // SECURITY: This pattern of extracting and manually executing scripts after innerHTML
-                    // is only acceptable here because the HTML source (dist/widget.min.html) is a local,
-                    // trusted file. Never use this pattern to render user-supplied or untrusted HTML.
+                    widgetContainer.replaceChildren();
+                    while (doc.body.firstChild) {
+                        widgetContainer.appendChild(doc.body.firstChild);
+                    }
+                    
+                    // Execute scripts that were parsed
                     var scripts = widgetContainer.getElementsByTagName('script');
                     for (var i = 0; i < scripts.length; i++) {
                         var newScript = document.createElement('script');
@@ -175,12 +179,32 @@
                 codeText = document.getElementById('widget-container').innerHTML;
             }
             navigator.clipboard.writeText(codeText).then(function() {
-                alert('Widget embed code copied to clipboard!');
+                showToast('Widget embed code copied to clipboard!', '#3b82f6');
             }).catch(function(err) {
-                alert('Failed to copy text: ' + err);
+                showToast('Failed to copy text: ' + err, '#ef4444');
             });
         }
         
+        function showToast(message, color) {
+            var toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.background = color || '#333';
+            toast.style.color = 'white';
+            toast.style.padding = '10px 20px';
+            toast.style.borderRadius = '8px';
+            toast.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+            toast.style.zIndex = '1000';
+            toast.style.fontFamily = 'sans-serif';
+            document.body.appendChild(toast);
+            setTimeout(function() {
+                document.body.removeChild(toast);
+            }, 3000);
+        }
+
         // initialize
         updateWidget();
     </script>
