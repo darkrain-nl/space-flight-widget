@@ -94,6 +94,50 @@
                         return res.json();
                     } )
                     .then(function(data) {
+                        try {
+                            localStorage.setItem('space_launch_cache', JSON.stringify(data));
+                        } catch(e) {}
+                        renderData(data);
+                        setTimeout(fetchLaunch, 300000);
+                    } )
+                    .catch(function(e) {
+                        var retryDelay = 30000;
+                        var errorMsg = t.errorTry;
+                        
+                        if (e && e.isRateLimit && e.detail) {
+                            var match = e.detail.match(/available in (\d+)/);
+                            if (match && match[1]) {
+                                retryDelay = (parseInt(match[1], 10) + 5) * 1000;
+                            }
+                            errorMsg = t.errorRateLimit || "Rate limit exceeded. We will try again later.";
+                        }
+                        
+                        var cachedData = null;
+                        try {
+                            var cacheStr = localStorage.getItem('space_launch_cache');
+                            if (cacheStr) {
+                                cachedData = JSON.parse(cacheStr);
+                            }
+                        } catch (err) {}
+                        
+                        if (cachedData) {
+                            renderData(cachedData);
+                            setTimeout(fetchLaunch, retryDelay);
+                            return;
+                        }
+                        
+                        titleEl.textContent = t.errorLoad;
+                        nameEl.textContent = errorMsg;
+                        nameEl.removeAttribute('href');
+                        providerPadEl.style.display = 'none';
+                        avatarEl.style.display = 'none';
+                        timerEl.style.display = 'none';
+                        statusEl.style.display = 'none';
+                        setTimeout(fetchLaunch, retryDelay);
+                    } );
+            }
+
+            function renderData(data) {
                         var launch = null;
                         var now = new Date().getTime();
                         for (var i = 0; i < data.results.length; i++) {
@@ -200,29 +244,6 @@
                             timerEl.style.display = 'none';
                             statusEl.style.display = 'none';
                         }
-                        setTimeout(fetchLaunch, 300000);
-                    } )
-                    .catch(function(e) {
-                        var retryDelay = 30000;
-                        var errorMsg = t.errorTry;
-                        
-                        if (e && e.isRateLimit && e.detail) {
-                            var match = e.detail.match(/available in (\d+)/);
-                            if (match && match[1]) {
-                                retryDelay = (parseInt(match[1], 10) + 5) * 1000;
-                            }
-                            errorMsg = t.errorRateLimit || "Rate limit exceeded. We will try again later.";
-                        }
-                        
-                        titleEl.textContent = t.errorLoad;
-                        nameEl.textContent = errorMsg;
-                        nameEl.removeAttribute('href');
-                        providerPadEl.style.display = 'none';
-                        avatarEl.style.display = 'none';
-                        timerEl.style.display = 'none';
-                        statusEl.style.display = 'none';
-                        setTimeout(fetchLaunch, retryDelay);
-                    } );
             }
 
             function updateTimer() {

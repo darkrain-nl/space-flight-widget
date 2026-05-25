@@ -23,7 +23,8 @@ Embed upcoming heavy-lift rocket launches directly into your forum or website. A
 - **Multi-Language Support**: Fully translated interface and launch statuses in English (`en`), French (`fr`), Italian (`it`), German (`de`), Spanish (`es`), and Dutch (`nl`). English is the default.
 - **BBCode Compatible**: Built entirely with inline styles and ES5 Javascript to bypass strict forum sanitizers and `[html]` tags.
 - **Smart Logic**: Automatically displays a fallback message if there isn't a heavy-lift launch scheduled within the next 7 days.
-- **Auto-Refreshing**: Refreshes data automatically every 5 minutes and recovers from API errors gracefully.
+- **Offline & Rate-Limit Resilient**: Caches launch data in `localStorage`. If the API hits rate limits (HTTP 429) or goes offline, the widget gracefully falls back to the cached data to keep the countdown ticking seamlessly.
+- **Auto-Refreshing**: Refreshes data automatically every 5 minutes in the background.
 - **Zero Dependencies**: Pure HTML and JavaScript. No external CSS stylesheets or libraries required.
 
 ## 🛠️ How to Embed
