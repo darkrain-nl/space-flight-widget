@@ -37,7 +37,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 4. Open `index.html` in your browser to preview your changes.
 
 ## 📡 Automated Updates
-This repository uses a GitHub Action to automatically monitor and update to the latest version of The Space Devs API. When the API updates, a Pull Request is automatically generated to update the widget.
+This repository uses a GitHub Action to automatically monitor and update to the latest version of The Space Devs API. When the API updates, a Pull Request is automatically generated to update the widget. Please note that after an update is merged, you will still need to manually copy and paste the new code from `dist/widget.min.html` to update the widget on your forum or website.
 
 ## 📜 Attribution
 Launch data is provided by [The Space Devs](https://thespacedevs.com/).
