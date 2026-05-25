@@ -211,7 +211,7 @@
                             if (match && match[1]) {
                                 retryDelay = (parseInt(match[1], 10) + 5) * 1000;
                             }
-                            errorMsg = "Rate limit exceeded. " + t.errorTry;
+                            errorMsg = "Rate limit exceeded. We will try again later.";
                         }
                         
                         titleEl.textContent = t.errorLoad;
