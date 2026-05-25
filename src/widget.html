@@ -85,6 +85,11 @@
                 clearInterval(timerInterval);
                 fetch(API_URL)
                     .then(function(res) {
+                        if (res.status === 429) {
+                            return res.json().then(function(errData) {
+                                throw { isRateLimit: true, detail: errData.detail };
+                            });
+                        }
                         if (!res.ok) throw new Error('API error');
                         return res.json();
                     } )
@@ -198,12 +203,25 @@
                         setTimeout(fetchLaunch, 300000);
                     } )
                     .catch(function(e) {
+                        var retryDelay = 30000;
+                        var errorMsg = t.errorTry;
+                        
+                        if (e && e.isRateLimit && e.detail) {
+                            var match = e.detail.match(/available in (\d+)/);
+                            if (match && match[1]) {
+                                retryDelay = (parseInt(match[1], 10) + 5) * 1000;
+                            }
+                            errorMsg = "Rate limit exceeded. " + t.errorTry;
+                        }
+                        
                         titleEl.textContent = t.errorLoad;
-                        nameEl.textContent = t.errorTry;
+                        nameEl.textContent = errorMsg;
                         nameEl.removeAttribute('href');
                         providerPadEl.style.display = 'none';
                         avatarEl.style.display = 'none';
-                        setTimeout(fetchLaunch, 30000);
+                        timerEl.style.display = 'none';
+                        statusEl.style.display = 'none';
+                        setTimeout(fetchLaunch, retryDelay);
                     } );
             }
 
