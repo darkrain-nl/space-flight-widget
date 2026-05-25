@@ -30,7 +30,12 @@
     <script>
         (function () {
             var API_URL = 'https://ll.thespacedevs.com/2.3.0/launches/upcoming/?limit=50';
-            var HEAVY = ['starship', 'super heavy', 'falcon heavy', 'sls', 'vulcan', 'new glenn', 'ariane 6', 'long march 5', 'angara a5', 'proton'];
+            var widgetEl = document.getElementById('space-countdown-widget');
+            var langCode = (widgetEl.getAttribute('data-lang') || 'en').toLowerCase();
+            var dataRockets = widgetEl.getAttribute('data-rockets');
+            var ALLOWED_ROCKETS = dataRockets !== null 
+                ? dataRockets.split(',').map(function(r) { return r.trim().toLowerCase(); }).filter(function(r) { return r.length > 0; }) 
+                : ['starship', 'super heavy', 'falcon heavy', 'sls', 'vulcan', 'new glenn', 'ariane 6', 'long march 5', 'angara a5', 'proton'];
 
             var i18n = {
                 en: { loading: "Loading...", days: "DAYS", hours: "HOURS", mins: "MINS", secs: "SECS", upcoming: "Upcoming Launch", statusReady: "Go for Launch", statusTbd: "To Be Determined", statusSuccess: "Launch Successful", statusTbc: "TBC", statusInFlight: "In Flight", statusUnknown: "Unknown Status", noneScheduled: "No Launch Scheduled", checkLater: "Check back later", errorLoad: "Error loading data", errorTry: "Try again later", attribution: "Data by The Space Devs" },
@@ -41,8 +46,6 @@
                 nl: { loading: "Laden...", days: "DAGEN", hours: "UUR", mins: "MIN", secs: "SEC", upcoming: "Aankomende Lancering", statusReady: "Klaar voor Lancering", statusTbd: "Nog te bepalen", statusSuccess: "Lancering Succesvol", statusTbc: "Nog te bevestigen", statusInFlight: "In de Vlucht", statusUnknown: "Onbekende Status", noneScheduled: "Geen Lancering Gepland", checkLater: "Kijk later nog eens", errorLoad: "Fout bij laden van gegevens", errorTry: "Probeer het later opnieuw", attribution: "Gegevens via The Space Devs" }
             };
 
-            var widgetEl = document.getElementById('space-countdown-widget');
-            var langCode = (widgetEl.getAttribute('data-lang') || 'en').toLowerCase();
             var t = i18n[langCode] || i18n['en'];
 
             var titleEl = document.getElementById('space-title');
@@ -89,10 +92,10 @@
                                 f = (l.rocket.configuration.family || '').toLowerCase();
                             }
                             
-                            var isHeavy = false;
-                            for (var j = 0; j < HEAVY.length; j++) {
-                                if (r.indexOf(HEAVY[j]) !== -1 || f.indexOf(HEAVY[j]) !== -1) {
-                                    isHeavy = true;
+                            var isAllowed = ALLOWED_ROCKETS.length === 0;
+                            for (var j = 0; j < ALLOWED_ROCKETS.length; j++) {
+                                if (r.indexOf(ALLOWED_ROCKETS[j]) !== -1 || f.indexOf(ALLOWED_ROCKETS[j]) !== -1) {
+                                    isAllowed = true;
                                     break;
                                 }
                             }
@@ -103,7 +106,7 @@
                             var isFuture = launchTime > now;
                             var isSoon = daysAway <= 7;
                             
-                            if (isHeavy && isFuture && isSoon) {
+                            if (isAllowed && isFuture && isSoon) {
                                 launch = l;
                                 break;
                             }
