@@ -7,7 +7,7 @@
 Embed upcoming heavy-lift rocket launches directly into your forum or website. A lightweight, responsive countdown widget powered by [The Space Devs API](https://thespacedevs.com/).
 
 
-[![Space Flight Widget Preview](assets/preview.png)](https://darkrain-nl.github.io/space-flight-widget/)
+[![Space Flight Widget Preview](assets/preview.gif)](https://darkrain-nl.github.io/space-flight-widget/)
 
 *Live Preview: [https://darkrain-nl.github.io/space-flight-widget/](https://darkrain-nl.github.io/space-flight-widget/)*
 
@@ -20,9 +20,10 @@ Embed upcoming heavy-lift rocket launches directly into your forum or website. A
 - **Zero Dependencies**: Pure HTML and JavaScript. No external CSS stylesheets or libraries required.
 
 ## 🛠️ How to Embed
-1. Copy the raw, single-line code from [`dist/widget.min.html`](dist/widget.min.html).
-2. Paste it into your website or forum's HTML embed block (e.g., using `[html]...[/html]`).
-3. *(Optional)* Change the `data-lang="en"` attribute in the HTML string to your preferred language code (`en`, `fr`, `it`, `de`, `es`, `nl`).
+1. Visit the [live preview page](https://darkrain-nl.github.io/space-flight-widget/) to dynamically configure your language and rockets, then click **Copy Embed Code**.
+2. Paste the generated code into your website or forum's HTML embed block (e.g., using `[html]...[/html]`).
+
+*Alternatively, you can manually copy the raw code from [`dist/widget.min.html`](dist/widget.min.html) and edit the `data-lang` and `data-rockets` attributes yourself.*
 
 ## 🤝 How to Contribute
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for important technical rules you need to follow when developing for this widget (like our strict BBCode parsing constraints).
