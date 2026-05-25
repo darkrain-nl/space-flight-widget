@@ -34,7 +34,7 @@
             var langCode = (widgetEl.getAttribute('data-lang') || 'en').toLowerCase();
             var dataRockets = widgetEl.getAttribute('data-rockets');
             var ALLOWED_ROCKETS = dataRockets !== null 
-                ? dataRockets.split(',').map(function(r) { return r.trim().toLowerCase(); }).filter(function(r) { return r.length > 0; }) 
+                ? dataRockets.split(',').map(function(r) { return r.trim().toLowerCase(); } ).filter(function(r) { return r.length > 0; } ) 
                 : ['starship', 'super heavy', 'falcon heavy', 'sls', 'vulcan', 'new glenn', 'ariane 6', 'long march 5', 'angara a5', 'proton'];
 
             var i18n = {
