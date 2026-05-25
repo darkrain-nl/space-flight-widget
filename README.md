@@ -6,8 +6,15 @@
 
 Embed upcoming heavy-lift rocket launches directly into your forum or website. A lightweight, responsive countdown widget powered by [The Space Devs API](https://thespacedevs.com/).
 
-
-[![Space Flight Widget Preview](assets/preview.gif)](https://darkrain-nl.github.io/space-flight-widget/)
+### Previews
+<p align="center">
+  <a href="https://darkrain-nl.github.io/space-flight-widget/">
+    <img src="assets/preview.gif" alt="Active Launch" width="350" />
+  </a>
+  <a href="https://darkrain-nl.github.io/space-flight-widget/">
+    <img src="assets/preview.png" alt="No Launch Fallback" width="350" />
+  </a>
+</p>
 
 *Live Preview: [https://darkrain-nl.github.io/space-flight-widget/](https://darkrain-nl.github.io/space-flight-widget/)*
 
