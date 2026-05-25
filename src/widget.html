@@ -140,7 +140,8 @@
             function renderData(data) {
                         var launch = null;
                         var now = new Date().getTime();
-                        for (var i = 0; i < data.results.length; i++) {
+                        if (data && data.results && data.results.length !== undefined) {
+                            for (var i = 0; i < data.results.length; i++) {
                             var l = data.results[i];
                             var r = '';
                             var f = '';
@@ -167,6 +168,7 @@
                                 launch = l;
                                 break;
                             }
+                        }
                         }
 
                         if (launch) {
