@@ -42,6 +42,10 @@
             var ALLOWED_ROCKETS = dataRockets !== null 
                 ? dataRockets.split(',').map(function(r) { return r.trim().toLowerCase(); } ).filter(function(r) { return r.length > 0; } ) 
                 : ['starship', 'super heavy', 'falcon heavy', 'sls', 'vulcan', 'new glenn', 'ariane 6', 'long march 5', 'angara a5', 'proton'];
+            var dataDays = widgetEl.getAttribute('data-days');
+            var MAX_DAYS = (dataDays !== null && !isNaN(parseInt(dataDays, 10)) && parseInt(dataDays, 10) > 0)
+                ? parseInt(dataDays, 10)
+                : 7;
 
             var i18n = {
                 en: { loading: "Loading...", days: "DAYS", hours: "HOURS", mins: "MINS", secs: "SECS", upcoming: "Upcoming Launch", statusReady: "Go for Launch", statusTbd: "To Be Determined", statusSuccess: "Launch Successful", statusTbc: "TBC", statusInFlight: "In Flight", statusUnknown: "Unknown Status", noneScheduled: "No Launch Scheduled", checkLater: "Check back later", errorLoad: "Error loading data", errorTry: "Try again later", errorRateLimit: "Rate limit exceeded. We will try again later.", attribution: "Data by The Space Devs" },
@@ -162,7 +166,7 @@
                             var daysAway = (launchTime - now) / (1000 * 60 * 60 * 24);
                             
                             var isFuture = launchTime > now;
-                            var isSoon = daysAway <= 7;
+                            var isSoon = daysAway <= MAX_DAYS;
                             
                             if (isAllowed && isFuture && isSoon) {
                                 launch = l;
