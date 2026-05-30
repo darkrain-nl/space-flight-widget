@@ -22,16 +22,31 @@ Embed upcoming heavy-lift rocket launches directly into your forum or website. A
 ## ✨ Features
 - **Multi-Language Support**: Fully translated interface and launch statuses in English (`en`), French (`fr`), Italian (`it`), German (`de`), Spanish (`es`), and Dutch (`nl`). English is the default.
 - **BBCode Compatible**: Built entirely with inline styles and ES5 Javascript to bypass strict forum sanitizers and `[html]` tags.
-- **Smart Logic**: Automatically displays a fallback message if there isn't a heavy-lift launch scheduled within the next 7 days.
+- **Smart Logic**: Automatically displays a fallback message if there isn't a launch scheduled within the configured time window (default: 7 days, configurable via `data-days`).
 - **Offline & Rate-Limit Resilient**: Caches launch data in `localStorage`. If the API hits rate limits (HTTP 429) or goes offline, the widget gracefully falls back to the cached data to keep the countdown ticking seamlessly.
 - **Auto-Refreshing**: Refreshes data automatically every 5 minutes in the background.
 - **Zero Dependencies**: Pure HTML and JavaScript. No external CSS stylesheets or libraries required.
 
 ## 🛠️ How to Embed
-1. Visit the [live preview page](https://darkrain-nl.github.io/space-flight-widget/) to dynamically configure your language and rockets, then click **Copy Embed Code**.
+1. Visit the [live preview page](https://darkrain-nl.github.io/space-flight-widget/) to dynamically configure your language, rockets, and days ahead, then click **Copy Embed Code**.
 2. Paste the generated code into your website or forum's HTML embed block (e.g., using `[html]...[/html]`).
 
-*Alternatively, you can manually copy the raw code from [`dist/widget.min.html`](dist/widget.min.html) and edit the `data-lang` and `data-rockets` attributes yourself.*
+*Alternatively, you can manually copy the raw code from [`dist/widget.min.html`](dist/widget.min.html) and edit the `data-lang`, `data-rockets`, and `data-days` attributes yourself.*
+
+### ⚙️ Configuration Options
+
+All configuration is done via `data-*` attributes on the widget's root `<div>`:
+
+| Attribute | Description | Default | Example |
+|---|---|---|---|
+| `data-lang` | Display language (`en`, `fr`, `it`, `de`, `es`, `nl`) | `en` | `data-lang="nl"` |
+| `data-rockets` | Comma-separated list of rocket names/families to track | All major rockets | `data-rockets="starship, falcon heavy"` |
+| `data-days` | Number of days ahead to look for upcoming launches (positive integer) | `7` | `data-days="14"` |
+
+**Example with all options:**
+```html
+<div id="space-countdown-widget" data-lang="en" data-rockets="starship, falcon heavy" data-days="14" ...>
+```
 
 ## 🤝 How to Contribute
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for important technical rules you need to follow when developing for this widget (like our strict BBCode parsing constraints).
