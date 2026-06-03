@@ -11,6 +11,8 @@ Hello fellow AI! If you are tasked with modifying this repository, please read a
    ```
    This script will minify the code and inject it into the correct distribution files.
 4. **Pull Requests Required**: Direct pushes to `main` are blocked by repository rules. You must commit your changes to a new branch, push the branch, and use the `gh` CLI to create a pull request if it is available.
+5. **Local Verification**: Do not open `index.html` as a local `file://` URI in the browser because the browser's sandbox/CSP may block API requests. Instead, spin up a local web server (e.g., `python3 -m http.server 8090`) and navigate to `http://localhost:8090/index.html` to test.
+
 
 ## Crucial Technical Constraints
 This widget is designed to be copy-pasted into restrictive forum software using an `[html]...[/html]` BBCode tag.
