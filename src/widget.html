@@ -86,9 +86,16 @@
             attrLinkEl.textContent = t.attribution;
 
             var targetDate;
-            var timerInterval;
             var fetchCount = 0;
             var lastMatchedLaunch = null;
+
+            // Clear any active timers/timeouts from prior script runs on the page
+            if (window.spaceWidgetTimerInterval) {
+                clearInterval(window.spaceWidgetTimerInterval);
+            }
+            if (window.spaceWidgetFetchTimeout) {
+                clearTimeout(window.spaceWidgetFetchTimeout);
+            }
 
             /* Returns { interval: ms, skipThrottle: boolean } based on launch proximity */
             function getRefreshInterval(launch) {
@@ -198,11 +205,19 @@
                     }
                 }
 
-                setTimeout(fetchLaunch, interval);
+                if (window.spaceWidgetFetchTimeout) {
+                    clearTimeout(window.spaceWidgetFetchTimeout);
+                }
+                window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, interval);
             }
 
             function fetchLaunch() {
-                clearInterval(timerInterval);
+                if (window.spaceWidgetTimerInterval) {
+                    clearInterval(window.spaceWidgetTimerInterval);
+                }
+                if (window.spaceWidgetFetchTimeout) {
+                    clearTimeout(window.spaceWidgetFetchTimeout);
+                }
 
                 /* Pre-flight throttle check: skip fetch if near rate limit */
                 var cache = readCache();
@@ -211,7 +226,7 @@
                         renderData(cache.data);
                     }
                     var retryMs = getThrottleRetryDelay(cache);
-                    setTimeout(fetchLaunch, retryMs);
+                    window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryMs);
                     return;
                 }
 
@@ -254,7 +269,7 @@
                         var cachedObj = readCache();
                         if (cachedObj && cachedObj.data) {
                             renderData(cachedObj.data);
-                            setTimeout(fetchLaunch, retryDelay);
+                            window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
                             return;
                         }
                         
@@ -265,7 +280,7 @@
                         avatarEl.style.display = 'none';
                         timerEl.style.display = 'none';
                         statusEl.style.display = 'none';
-                        setTimeout(fetchLaunch, retryDelay);
+                        window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
                     } );
             }
 
@@ -368,7 +383,10 @@
                             statusEl.style.display = 'inline-block';
 
                             updateTimer();
-                            timerInterval = setInterval(updateTimer, 1000);
+                            if (window.spaceWidgetTimerInterval) {
+                                clearInterval(window.spaceWidgetTimerInterval);
+                            }
+                            window.spaceWidgetTimerInterval = setInterval(updateTimer, 1000);
                         } else {
                             titleEl.textContent = t.noneScheduled;
                             nameEl.textContent = t.checkLater;
@@ -385,7 +403,9 @@
             function updateTimer() {
                 var dist = targetDate - new Date().getTime();
                 if (dist < 0) {
-                    clearInterval(timerInterval);
+                    if (window.spaceWidgetTimerInterval) {
+                        clearInterval(window.spaceWidgetTimerInterval);
+                    }
                     return;
                 }
                 var d = Math.floor(dist / 86400000);
@@ -409,7 +429,10 @@
                 if (cacheAge < schedule.interval) {
                     /* Cache is fresh within the dynamic TTL, skip initial fetch */
                     var remaining = schedule.interval - cacheAge;
-                    setTimeout(fetchLaunch, remaining > 1000 ? remaining : 1000);
+                    if (window.spaceWidgetFetchTimeout) {
+                        clearTimeout(window.spaceWidgetFetchTimeout);
+                    }
+                    window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, remaining > 1000 ? remaining : 1000);
                 } else {
                     /* Cache is stale but we rendered it for instant UX, now fetch fresh */
                     fetchLaunch();
