@@ -215,7 +215,35 @@
         }
 
         // initialize
-        updateWidget();
+        var defaultRockets = ["starship", "falcon heavy", "sls", "vulcan", "new glenn", "ariane 6", "angara a5", "proton", "long march 5"];
+        var lang = document.getElementById('lang-select').value;
+        var daysVal = parseInt(document.getElementById('days-select').value, 10);
+        
+        var rocketInputs = document.getElementsByClassName('rocket-cb');
+        var selectedRockets = [];
+        for (var j = 0; j < rocketInputs.length; j++) {
+            if (rocketInputs[j].checked) {
+                selectedRockets.push(rocketInputs[j].value);
+            }
+        }
+        
+        var isDefaultRockets = selectedRockets.length === defaultRockets.length;
+        if (isDefaultRockets) {
+            for (var i = 0; i < selectedRockets.length; i++) {
+                if (defaultRockets.indexOf(selectedRockets[i]) === -1) {
+                    isDefaultRockets = false;
+                    break;
+                }
+            }
+        }
+        
+        // Initialize the textarea code view from the static widget
+        document.getElementById('code-output').value = document.getElementById('widget-container').innerHTML;
+        
+        // Only run updateWidget on load if form controls deviate from default values (e.g. browser autofill/restore)
+        if (lang !== 'en' || daysVal !== 7 || !isDefaultRockets) {
+            updateWidget();
+        }
     </script>
 </body>
 
