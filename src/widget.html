@@ -460,7 +460,17 @@
                 var age = now - (initCache.ts || 0);
                 var ttl = getDynamicTTL(matchedLaunch, initCache.throttle);
                 
-                if (age >= ttl) {
+                var hasFuture = false;
+                if (initCache.data.results && initCache.data.results.length > 0) {
+                    for (var i = 0; i < initCache.data.results.length; i++) {
+                        if (new Date(initCache.data.results[i].net).getTime() > now) {
+                            hasFuture = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (age >= ttl || !hasFuture) {
                     fetchLaunch();
                 } else {
                     var remaining = ttl - age;
