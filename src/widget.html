@@ -130,28 +130,28 @@
                 /* Category 1: Healthy Quota (more than 3 requests left) */
                 if (remaining > 3) {
                     if (isPrecise) {
-                        if (msAway < 300000) return 30000;      /* 30 seconds if < 5 mins away */
-                        if (hoursAway < 1) return 60000;       /* 1 min if < 1 hour away */
-                        if (hoursAway < 6) return 180000;      /* 3 mins */
-                        if (hoursAway < 24) return 300000;     /* 5 mins */
+                        if (msAway < 300000) return 120000;     /* 2 mins if < 5 mins away */
+                        if (hoursAway < 1) return 300000;       /* 5 mins if < 1 hour away */
+                        if (hoursAway < 6) return 600000;       /* 10 mins if < 6 hours away */
+                        if (hoursAway < 24) return 900000;      /* 15 mins if < 24 hours away */
                     } else {
-                        if (hoursAway < 24) return 600000;     /* 10 mins for coarse launches */
+                        if (hoursAway < 24) return 900000;      /* 15 mins for coarse launches */
                     }
-                    return 900000; /* 15 mins default */
+                    return 1800000; /* 30 mins default */
                 }
 
                 /* Category 2: Conserving Quota (1 to 3 requests left) */
                 if (remaining >= 1) {
                     if (isPrecise) {
-                        if (hoursAway < 0.5) return 120000;    /* 2 mins (critical window) */
-                        if (hoursAway < 2) return 300000;      /* 5 mins */
-                        if (hoursAway < 12) return 900000;     /* 15 mins */
+                        if (hoursAway < 0.5) return 300000;     /* 5 mins (critical window) */
+                        if (hoursAway < 2) return 600000;       /* 10 mins */
+                        if (hoursAway < 12) return 1200000;     /* 20 mins */
                     }
-                    return 1200000; /* 20 mins default */
+                    return 1800000; /* 30 mins default */
                 }
 
                 /* Category 3: Quota Depleted */
-                return 300000; /* 5 mins */
+                return 600000; /* 10 mins */
             }
 
             /* Read the structured cache from localStorage */
@@ -184,6 +184,11 @@
             }
 
             function fetchLaunch() {
+                if (window.spaceWidgetFetching) {
+                    return;
+                }
+                window.spaceWidgetFetching = true;
+
                 if (window.spaceWidgetTimerInterval) {
                     clearInterval(window.spaceWidgetTimerInterval);
                 }
@@ -191,7 +196,7 @@
                     clearTimeout(window.spaceWidgetFetchTimeout);
                 }
 
-                fetch(THROTTLE_URL)
+                fetch(THROTTLE_URL, { cache: 'no-store' } )
                     .then(function(res) {
                         if (!res.ok) throw new Error('Throttle API failed');
                         return res.json();
@@ -216,6 +221,7 @@
                             }
                             var retryDelay = (throttleObj.next_use_secs > 0) ? (throttleObj.next_use_secs + 5) * 1000 : 300000;
                             window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
+                            window.spaceWidgetFetching = false;
                             return;
                         }
                         
@@ -227,7 +233,7 @@
             }
 
             function doFetchLaunch(throttleObj) {
-                fetch(API_URL)
+                fetch(API_URL, { cache: 'no-store' } )
                     .then(function(res) {
                         if (res.status === 429) {
                             return res.json().then(function(errData) {
@@ -248,6 +254,7 @@
                             clearTimeout(window.spaceWidgetFetchTimeout);
                         }
                         window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, interval);
+                        window.spaceWidgetFetching = false;
                     } )
                     .catch(function(e) {
                         var retryDelay = 30000;
@@ -265,6 +272,7 @@
                         if (cachedObj && cachedObj.data) {
                             renderData(cachedObj.data);
                             window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
+                            window.spaceWidgetFetching = false;
                             return;
                         }
                         
@@ -277,6 +285,7 @@
                         statusEl.style.display = 'none';
                         warningBoxEl.style.display = 'none';
                         window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
+                        window.spaceWidgetFetching = false;
                     } );
             }
 
