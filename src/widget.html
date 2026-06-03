@@ -443,22 +443,22 @@
             }
 
             function updateTimer() {
-                var dist = targetDate - new Date().getTime();
-                if (dist < 0) {
-                    if (window.spaceWidgetTimerInterval) {
-                        clearInterval(window.spaceWidgetTimerInterval);
-                    }
-                    return;
-                }
-                var d = Math.floor(dist / 86400000);
-                var h = Math.floor((dist % 86400000) / 3600000);
-                var m = Math.floor((dist % 3600000) / 60000);
-                var s = Math.floor((dist % 60000) / 1000);
+                var now = new Date().getTime();
+                var dist = targetDate - now;
+                var isCountUp = dist < 0;
+                var absDist = Math.abs(dist);
+                
+                var d = Math.floor(absDist / 86400000);
+                var h = Math.floor((absDist % 86400000) / 3600000);
+                var m = Math.floor((absDist % 3600000) / 60000);
+                var s = Math.floor((absDist % 60000) / 1000);
                 
                 dEl.textContent = (d < 10 ? '0' : '') + d;
                 hEl.textContent = (h < 10 ? '0' : '') + h;
                 mEl.textContent = (m < 10 ? '0' : '') + m;
                 sEl.textContent = (s < 10 ? '0' : '') + s;
+
+                titleEl.textContent = t.upcoming + (isCountUp ? ' • T+' : ' • T-');
             }
 
             /* Cache-first initialization: render from cache if within TTL, then fetch */
