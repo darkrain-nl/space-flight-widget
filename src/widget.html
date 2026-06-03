@@ -36,6 +36,8 @@
     <script>
         (function () {
             var API_URL = 'https://ll.thespacedevs.com/2.3.0/launches/upcoming/?limit=50';
+            var THROTTLE_URL = 'https://ll.thespacedevs.com/2.3.0/api-throttle/';
+            var CACHE_KEY = 'space_launch_cache';
             var widgetEl = document.getElementById('space-countdown-widget');
             var langCode = (widgetEl.getAttribute('data-lang') || 'en').toLowerCase();
             var dataRockets = widgetEl.getAttribute('data-rockets');
@@ -84,25 +86,157 @@
 
             var targetDate;
             var timerInterval;
+            var fetchCount = 0;
+            var lastMatchedLaunch = null;
+
+            /* Returns { interval: ms, skipThrottle: boolean } based on launch proximity */
+            function getRefreshInterval(launch) {
+                if (!launch || !launch.net) {
+                    return { interval: 1800000, skipThrottle: false };
+                }
+                var now = new Date().getTime();
+                var launchTime = new Date(launch.net).getTime();
+                var hoursAway = (launchTime - now) / 3600000;
+
+                if (hoursAway < 1) {
+                    return { interval: 300000, skipThrottle: true };
+                }
+                if (hoursAway < 6) {
+                    return { interval: 480000, skipThrottle: false };
+                }
+                if (hoursAway < 24) {
+                    return { interval: 720000, skipThrottle: false };
+                }
+                if (hoursAway < 72) {
+                    return { interval: 900000, skipThrottle: false };
+                }
+                return { interval: 1200000, skipThrottle: false };
+            }
+
+            /* Read the structured cache from localStorage */
+            function readCache() {
+                try {
+                    var raw = localStorage.getItem(CACHE_KEY);
+                    if (!raw) return null;
+                    var parsed = JSON.parse(raw);
+                    /* Support legacy cache format (raw API data without wrapper) */
+                    if (parsed && parsed.results && !parsed.data) {
+                        return { data: parsed, ts: 0, throttle: null };
+                    }
+                    if (parsed && parsed.data) {
+                        return parsed;
+                    }
+                } catch (e) {}
+                return null;
+            }
+
+            /* Write structured cache to localStorage */
+            function writeCache(data, throttle) {
+                try {
+                    var existing = readCache();
+                    var cacheObj = {
+                        data: data,
+                        ts: new Date().getTime(),
+                        throttle: (throttle !== undefined) ? throttle : (existing ? existing.throttle : null)
+                    };
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(cacheObj) );
+                } catch (e) {}
+            }
+
+            /* Check if throttle data indicates we are near the rate limit */
+            function isNearRateLimit(cache) {
+                if (!cache || !cache.throttle) return false;
+                var th = cache.throttle;
+                /* Throttle data older than the window is stale, ignore it */
+                var windowMs = (th.limit_frequency_secs || 3600) * 1000;
+                var age = new Date().getTime() - (cache.ts || 0);
+                if (age > windowMs) return false;
+                var limit = th.your_request_limit || 15;
+                return (th.current_use >= limit - 3);
+            }
+
+            /* Get the retry delay from throttle data when near rate limit */
+            function getThrottleRetryDelay(cache) {
+                if (!cache || !cache.throttle) return 60000;
+                var secs = cache.throttle.next_use_secs || 0;
+                return (secs + 5) * 1000;
+            }
+
+            /* Fetch throttle info and update cache */
+            function fetchThrottleInfo() {
+                fetch(THROTTLE_URL)
+                    .then(function(res) {
+                        if (!res.ok) return null;
+                        return res.json();
+                    } )
+                    .then(function(throttleData) {
+                        if (throttleData && throttleData.your_request_limit !== undefined) {
+                            var cache = readCache();
+                            if (cache) {
+                                cache.throttle = throttleData;
+                                cache.ts = new Date().getTime();
+                                try {
+                                    localStorage.setItem(CACHE_KEY, JSON.stringify(cache) );
+                                } catch (e) {}
+                            }
+                        }
+                    } )
+                    .catch(function() {} );
+            }
+
+            function scheduleNext(launch) {
+                var schedule = getRefreshInterval(launch);
+                var interval = schedule.interval;
+
+                /* Check if throttle data forces a longer delay */
+                var cache = readCache();
+                if (isNearRateLimit(cache) ) {
+                    var throttleDelay = getThrottleRetryDelay(cache);
+                    if (throttleDelay > interval) {
+                        interval = throttleDelay;
+                    }
+                }
+
+                setTimeout(fetchLaunch, interval);
+            }
 
             function fetchLaunch() {
                 clearInterval(timerInterval);
+
+                /* Pre-flight throttle check: skip fetch if near rate limit */
+                var cache = readCache();
+                if (isNearRateLimit(cache) ) {
+                    if (cache && cache.data) {
+                        renderData(cache.data);
+                    }
+                    var retryMs = getThrottleRetryDelay(cache);
+                    setTimeout(fetchLaunch, retryMs);
+                    return;
+                }
+
                 fetch(API_URL)
                     .then(function(res) {
                         if (res.status === 429) {
                             return res.json().then(function(errData) {
                                 throw { isRateLimit: true, detail: errData.detail };
-                            });
+                            } );
                         }
                         if (!res.ok) throw new Error('API error');
                         return res.json();
                     } )
                     .then(function(data) {
-                        try {
-                            localStorage.setItem('space_launch_cache', JSON.stringify(data));
-                        } catch(e) {}
-                        renderData(data);
-                        setTimeout(fetchLaunch, 300000);
+                        writeCache(data);
+                        var matchedLaunch = renderData(data);
+                        lastMatchedLaunch = matchedLaunch;
+
+                        /* Conditionally fetch throttle info every 3rd successful call */
+                        fetchCount++;
+                        var schedule = getRefreshInterval(matchedLaunch);
+                        if (fetchCount % 3 === 0 && !schedule.skipThrottle) {
+                            fetchThrottleInfo();
+                        }
+
+                        scheduleNext(matchedLaunch);
                     } )
                     .catch(function(e) {
                         var retryDelay = 30000;
@@ -116,16 +250,9 @@
                             errorMsg = t.errorRateLimit || "Rate limit exceeded. We will try again later.";
                         }
                         
-                        var cachedData = null;
-                        try {
-                            var cacheStr = localStorage.getItem('space_launch_cache');
-                            if (cacheStr) {
-                                cachedData = JSON.parse(cacheStr);
-                            }
-                        } catch (err) {}
-                        
-                        if (cachedData) {
-                            renderData(cachedData);
+                        var cachedObj = readCache();
+                        if (cachedObj && cachedObj.data) {
+                            renderData(cachedObj.data);
                             setTimeout(fetchLaunch, retryDelay);
                             return;
                         }
@@ -229,7 +356,7 @@
                             }
 
                             if (launch.image && (launch.image.thumbnail_url || launch.image.image_url)) {
-                                avatarEl.src = encodeURI(String(launch.image.thumbnail_url || launch.image.image_url));
+                                avatarEl.src = encodeURI(String(launch.image.thumbnail_url || launch.image.image_url) );
                                 avatarEl.style.display = 'block';
                             } else {
                                 avatarEl.style.display = 'none';
@@ -250,6 +377,8 @@
                             timerEl.style.display = 'none';
                             statusEl.style.display = 'none';
                         }
+
+                        return launch;
             }
 
             function updateTimer() {
@@ -269,7 +398,25 @@
                 sEl.textContent = (s < 10 ? '0' : '') + s;
             }
 
-            fetchLaunch();
+            /* Cache-first initialization: render from cache if within TTL, then fetch */
+            var initCache = readCache();
+            if (initCache && initCache.data) {
+                var matchedLaunch = renderData(initCache.data);
+                lastMatchedLaunch = matchedLaunch;
+                var cacheAge = new Date().getTime() - (initCache.ts || 0);
+                var schedule = getRefreshInterval(matchedLaunch);
+                if (cacheAge < schedule.interval) {
+                    /* Cache is fresh within the dynamic TTL, skip initial fetch */
+                    var remaining = schedule.interval - cacheAge;
+                    setTimeout(fetchLaunch, remaining > 1000 ? remaining : 1000);
+                } else {
+                    /* Cache is stale but we rendered it for instant UX, now fetch fresh */
+                    fetchLaunch();
+                }
+            } else {
+                /* No cache, fetch immediately */
+                fetchLaunch();
+            }
         } )();
     </script>
 </div>
