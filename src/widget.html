@@ -29,6 +29,8 @@
         </div>
     </div>
 
+    <div id="space-warning-box" style="display: none; font-size: 0.7rem; color: #f87171; margin-top: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 12px; border-radius: 8px; text-align: left; width: 100%; box-sizing: border-box;"></div>
+
     <div id="space-attribution" style="margin-top: 1.5rem; font-size: 0.65rem; text-align: right; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.8rem;">
         <a id="space-attr-link" href="https://thespacedevs.com/" target="_blank" rel="noopener noreferrer" style="color: #64748b; text-decoration: none;">Data by The Space Devs</a>
     </div>
@@ -51,12 +53,12 @@
                 : 7;
 
             var i18n = {
-                en: { loading: "Loading...", days: "DAYS", hours: "HOURS", mins: "MINS", secs: "SECS", upcoming: "Upcoming Launch", statusReady: "Go for Launch", statusTbd: "To Be Determined", statusSuccess: "Launch Successful", statusTbc: "TBC", statusInFlight: "In Flight", statusUnknown: "Unknown Status", noneScheduled: "No Launch Scheduled", checkLater: "Check back later", errorLoad: "Error loading data", errorTry: "Try again later", errorRateLimit: "Rate limit exceeded. We will try again later.", attribution: "Data by The Space Devs" },
-                fr: { loading: "Chargement...", days: "JOURS", hours: "HEURES", mins: "MIN", secs: "SEC", upcoming: "Lancement à venir", statusReady: "Prêt pour le lancement", statusTbd: "À déterminer", statusSuccess: "Lancement réussi", statusTbc: "À confirmer", statusInFlight: "En vol", statusUnknown: "Statut inconnu", noneScheduled: "Aucun lancement prévu", checkLater: "Revenez plus tard", errorLoad: "Erreur de chargement", errorTry: "Réessayez plus tard", errorRateLimit: "Limite de requêtes atteinte. Nous réessayerons plus tard.", attribution: "Données par The Space Devs" },
-                it: { loading: "Caricamento...", days: "GIORNI", hours: "ORE", mins: "MIN", secs: "SEC", upcoming: "Lancio imminente", statusReady: "Pronto al lancio", statusTbd: "Da definire", statusSuccess: "Lancio riuscito", statusTbc: "Da confermare", statusInFlight: "In volo", statusUnknown: "Stato sconosciuto", noneScheduled: "Nessun lancio programmato", checkLater: "Riprova più tardi", errorLoad: "Errore di caricamento", errorTry: "Riprova più tardi", errorRateLimit: "Limite di richieste superato. Riproveremo più tardi.", attribution: "Dati di The Space Devs" },
-                de: { loading: "Laden...", days: "TAGE", hours: "STD", mins: "MIN", secs: "SEK", upcoming: "Bevorstehender Start", statusReady: "Bereit zum Start", statusTbd: "Noch zu bestimmen", statusSuccess: "Start erfolgreich", statusTbc: "Zu bestätigen", statusInFlight: "Im Flug", statusUnknown: "Unbekannter Status", noneScheduled: "Kein Start geplant", checkLater: "Schauen Sie später wieder vorbei", errorLoad: "Fehler beim Laden", errorTry: "Später erneut versuchen", errorRateLimit: "Ratenlimit überschritten. Wir versuchen es später erneut.", attribution: "Daten von The Space Devs" },
-                es: { loading: "Cargando...", days: "DÍAS", hours: "HORAS", mins: "MIN", secs: "SEG", upcoming: "Próximo Lanzamiento", statusReady: "Listo para el lanzamiento", statusTbd: "Por determinar", statusSuccess: "Lanzamiento exitoso", statusTbc: "Por confirmar", statusInFlight: "En vuelo", statusUnknown: "Estado desconocido", noneScheduled: "Ningún lanzamiento programado", checkLater: "Vuelve más tarde", errorLoad: "Error al cargar los datos", errorTry: "Inténtalo de nuevo más tarde", errorRateLimit: "Límite de solicitudes excedido. Lo intentaremos de nuevo más tarde.", attribution: "Datos de The Space Devs" },
-                nl: { loading: "Laden...", days: "DAGEN", hours: "UUR", mins: "MIN", secs: "SEC", upcoming: "Aankomende Lancering", statusReady: "Klaar voor Lancering", statusTbd: "Nog te bepalen", statusSuccess: "Lancering Succesvol", statusTbc: "Nog te bevestigen", statusInFlight: "In de Vlucht", statusUnknown: "Onbekende Status", noneScheduled: "Geen Lancering Gepland", checkLater: "Kijk later nog eens", errorLoad: "Fout bij laden van gegevens", errorTry: "Probeer het later opnieuw", errorRateLimit: "Limiet overschreden. We proberen het later opnieuw.", attribution: "Gegevens via The Space Devs" }
+                en: { loading: "Loading...", days: "DAYS", hours: "HOURS", mins: "MINS", secs: "SECS", upcoming: "Upcoming Launch", statusReady: "Go for Launch", statusTbd: "To Be Determined", statusSuccess: "Launch Successful", statusTbc: "TBC", statusInFlight: "In Flight", statusUnknown: "Unknown Status", statusHold: "On Hold", statusPending: "Pending", statusPostponed: "Postponed", statusSuspended: "Suspended", statusCancelled: "Cancelled", noneScheduled: "No Launch Scheduled", checkLater: "Check back later", errorLoad: "Error loading data", errorTry: "Try again later", errorRateLimit: "Rate limit exceeded. We will try again later.", attribution: "Data by The Space Devs", weather: "Weather", holdReason: "Hold Reason: ", failReason: "Failure Reason: ", weatherConcern: "Weather Concern: " },
+                fr: { loading: "Chargement...", days: "JOURS", hours: "HEURES", mins: "MIN", secs: "SEC", upcoming: "Lancement à venir", statusReady: "Prêt pour le lancement", statusTbd: "À déterminer", statusSuccess: "Lancement réussi", statusTbc: "À confirmer", statusInFlight: "En vol", statusUnknown: "Statut inconnu", statusHold: "En attente", statusPending: "En attente de lancement", statusPostponed: "Reporté", statusSuspended: "Suspendu", statusCancelled: "Annulé", noneScheduled: "Aucun lancement prévu", checkLater: "Revenez plus tard", errorLoad: "Erreur de chargement", errorTry: "Réessayez plus tard", errorRateLimit: "Limite de requêtes atteinte. Nous réessayerons plus tard.", attribution: "Données par The Space Devs", weather: "Météo", holdReason: "Motif d'attente : ", failReason: "Motif d'échec : ", weatherConcern: "Problème météo : " },
+                it: { loading: "Caricamento...", days: "GIORNI", hours: "ORE", mins: "MIN", secs: "SEC", upcoming: "Lancio imminente", statusReady: "Pronto al lancio", statusTbd: "Da definire", statusSuccess: "Lancio riuscito", statusTbc: "Da confermare", statusInFlight: "In volo", statusUnknown: "Stato sconosciuto", statusHold: "In attesa", statusPending: "In sospeso", statusPostponed: "Posticipato", statusSuspended: "Sospeso", statusCancelled: "Annullato", noneScheduled: "Nessun lancio programmato", checkLater: "Riprova più tardi", errorLoad: "Errore di caricamento", errorTry: "Riprova più tardi", errorRateLimit: "Limite di richieste superato. Riproveremo più tardi.", attribution: "Dati di The Space Devs", weather: "Meteo", holdReason: "Motivo attesa: ", failReason: "Motivo fallimento: ", weatherConcern: "Allerta meteo: " },
+                de: { loading: "Laden...", days: "TAGE", hours: "STD", mins: "MIN", secs: "SEK", upcoming: "Bevorstehender Start", statusReady: "Bereit zum Start", statusTbd: "Noch zu bestimmen", statusSuccess: "Start erfolgreich", statusTbc: "Zu bestätigen", statusInFlight: "Im Flug", statusUnknown: "Unbekannter Status", statusHold: "Angehalten", statusPending: "Ausstehend", statusPostponed: "Verschoben", statusSuspended: "Ausgesetzt", statusCancelled: "Abgesagt", noneScheduled: "Kein Start geplant", checkLater: "Schauen Sie später wieder vorbei", errorLoad: "Fehler beim Laden", errorTry: "Später erneut versuchen", errorRateLimit: "Ratenlimit überschritten. Wir versuchen es später erneut.", attribution: "Daten von The Space Devs", weather: "Wetter", holdReason: "Grund für Halten: ", failReason: "Grund für Fehlschlag: ", weatherConcern: "Wettersorge: " },
+                es: { loading: "Cargando...", days: "DÍAS", hours: "HORAS", mins: "MIN", secs: "SEG", upcoming: "Próximo Lanzamiento", statusReady: "Listo para el lanzamiento", statusTbd: "Por determinar", statusSuccess: "Lanzamiento exitoso", statusTbc: "Por confirmar", statusInFlight: "En vuelo", statusUnknown: "Estado desconocido", statusHold: "En espera", statusPending: "Pendiente", statusPostponed: "Pospuesto", statusSuspended: "Suspendido", statusCancelled: "Cancelado", noneScheduled: "Ningún lanzamiento programado", checkLater: "Vuelve más tarde", errorLoad: "Error al cargar los datos", errorTry: "Inténtalo de nuevo más tarde", errorRateLimit: "Límite de solicitudes excedido. Lo intentaremos de nuevo más tarde.", attribution: "Datos de The Space Devs", weather: "Clima", holdReason: "Razón de espera: ", failReason: "Razón de fallo: ", weatherConcern: "Alerta del clima: " },
+                nl: { loading: "Laden...", days: "DAGEN", hours: "UUR", mins: "MIN", secs: "SEC", upcoming: "Aankomende Lancering", statusReady: "Klaar voor Lancering", statusTbd: "Nog te bepalen", statusSuccess: "Lancering Succesvol", statusTbc: "Nog te bevestigen", statusInFlight: "In de Vlucht", statusUnknown: "Onbekende Status", statusHold: "In de wacht", statusPending: "In afwachting", statusPostponed: "Uitgesteld", statusSuspended: "Geschorst", statusCancelled: "Geannuleerd", noneScheduled: "Geen Lancering Gepland", checkLater: "Kijk later nog eens", errorLoad: "Fout bij laden van gegevens", errorTry: "Probeer het later opnieuw", errorRateLimit: "Limiet overschreden. We proberen het later opnieuw.", attribution: "Gegevens via The Space Devs", weather: "Weer", holdReason: "Reden voor wacht: ", failReason: "Reden voor mislukking: ", weatherConcern: "Weerwaarschuwing: " }
             };
 
             var t = i18n[langCode] || i18n['en'];
@@ -66,6 +68,7 @@
             var providerPadEl = document.getElementById('space-provider-pad');
             var avatarEl = document.getElementById('space-avatar');
             var statusEl = document.getElementById('space-status');
+            var warningBoxEl = document.getElementById('space-warning-box');
             var timerEl = document.getElementById('space-timer');
             var dEl = document.getElementById('space-d');
             var hEl = document.getElementById('space-h');
@@ -96,19 +99,59 @@
             }
 
             /* Returns interval in ms based on launch proximity */
-            function getRefreshInterval(launch) {
+            /* Returns interval in ms based on launch proximity and API throttle data */
+            function getDynamicTTL(launch, throttle) {
                 if (!launch || !launch.net) {
                     return 1800000;
                 }
+
+                var limit = (throttle && throttle.your_request_limit) || 15;
+                var currentUse = (throttle && throttle.current_use) || 0;
+                var remaining = limit - currentUse;
+
                 var now = new Date().getTime();
                 var launchTime = new Date(launch.net).getTime();
-                var hoursAway = (launchTime - now) / 3600000;
+                var precisionId = (launch.net_precision && launch.net_precision.id) || 5;
 
-                if (hoursAway < 1) return 300000;
-                if (hoursAway < 6) return 480000;
-                if (hoursAway < 24) return 720000;
-                if (hoursAway < 72) return 900000;
-                return 1200000;
+                /* If we are throttled, wait for next reset */
+                if (throttle && throttle.next_use_secs > 0) {
+                    return (throttle.next_use_secs + 5) * 1000;
+                }
+
+                /* If launch time has passed, cache is stale immediately */
+                if (now >= launchTime) {
+                    return 0;
+                }
+
+                var msAway = launchTime - now;
+                var hoursAway = msAway / 3600000;
+                var isPrecise = (precisionId <= 6);
+
+                /* Category 1: Healthy Quota (more than 3 requests left) */
+                if (remaining > 3) {
+                    if (isPrecise) {
+                        if (msAway < 300000) return 30000;      /* 30 seconds if < 5 mins away */
+                        if (hoursAway < 1) return 60000;       /* 1 min if < 1 hour away */
+                        if (hoursAway < 6) return 180000;      /* 3 mins */
+                        if (hoursAway < 24) return 300000;     /* 5 mins */
+                    } else {
+                        if (hoursAway < 24) return 600000;     /* 10 mins for coarse launches */
+                    }
+                    return 900000; /* 15 mins default */
+                }
+
+                /* Category 2: Conserving Quota (1 to 3 requests left) */
+                if (remaining >= 1) {
+                    if (isPrecise) {
+                        if (hoursAway < 0.5) return 120000;    /* 2 mins (critical window) */
+                        if (hoursAway < 2) return 300000;      /* 5 mins */
+                        if (hoursAway < 12) return 900000;     /* 15 mins */
+                    }
+                    return 1200000; /* 20 mins default */
+                }
+
+                /* Category 3: Quota Depleted */
+                return 300000; /* 5 mins */
             }
 
             /* Read the structured cache from localStorage */
@@ -117,7 +160,6 @@
                     var raw = localStorage.getItem(CACHE_KEY);
                     if (!raw) return null;
                     var parsed = JSON.parse(raw);
-                    /* Support legacy cache format (raw API data without wrapper) */
                     if (parsed && parsed.results && !parsed.data) {
                         return { data: parsed, ts: 0, throttle: null };
                     }
@@ -141,64 +183,6 @@
                 } catch (e) {}
             }
 
-            /* Check if throttle data indicates we are near the rate limit */
-            function isNearRateLimit(cache) {
-                if (!cache || !cache.throttle) return false;
-                var th = cache.throttle;
-                /* Throttle data older than the window is stale, ignore it */
-                var windowMs = (th.limit_frequency_secs || 3600) * 1000;
-                var age = new Date().getTime() - (cache.ts || 0);
-                if (age > windowMs) return false;
-                var limit = th.your_request_limit || 15;
-                return (th.current_use >= limit - 3);
-            }
-
-            /* Get the retry delay from throttle data when near rate limit */
-            function getThrottleRetryDelay(cache) {
-                if (!cache || !cache.throttle) return 60000;
-                var secs = cache.throttle.next_use_secs || 0;
-                return (secs + 5) * 1000;
-            }
-
-            /* Fetch throttle info and update cache */
-            function fetchThrottleInfo() {
-                fetch(THROTTLE_URL)
-                    .then(function(res) {
-                        if (!res.ok) return null;
-                        return res.json();
-                    } )
-                    .then(function(throttleData) {
-                        if (throttleData && throttleData.your_request_limit !== undefined) {
-                            var cache = readCache();
-                            if (cache) {
-                                cache.throttle = throttleData;
-                                try {
-                                    localStorage.setItem(CACHE_KEY, JSON.stringify(cache) );
-                                } catch (e) {}
-                            }
-                        }
-                    } )
-                    .catch(function() {} );
-            }
-
-            function scheduleNext(launch) {
-                var interval = getRefreshInterval(launch);
-
-                /* Check if throttle data forces a longer delay */
-                var cache = readCache();
-                if (isNearRateLimit(cache) ) {
-                    var throttleDelay = getThrottleRetryDelay(cache);
-                    if (throttleDelay > interval) {
-                        interval = throttleDelay;
-                    }
-                }
-
-                if (window.spaceWidgetFetchTimeout) {
-                    clearTimeout(window.spaceWidgetFetchTimeout);
-                }
-                window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, interval);
-            }
-
             function fetchLaunch() {
                 if (window.spaceWidgetTimerInterval) {
                     clearInterval(window.spaceWidgetTimerInterval);
@@ -207,17 +191,43 @@
                     clearTimeout(window.spaceWidgetFetchTimeout);
                 }
 
-                /* Pre-flight throttle check: skip fetch if near rate limit */
-                var cache = readCache();
-                if (isNearRateLimit(cache) ) {
-                    if (cache && cache.data) {
-                        renderData(cache.data);
-                    }
-                    var retryMs = getThrottleRetryDelay(cache);
-                    window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryMs);
-                    return;
-                }
+                fetch(THROTTLE_URL)
+                    .then(function(res) {
+                        if (!res.ok) throw new Error('Throttle API failed');
+                        return res.json();
+                    } )
+                    .then(function(throttleData) {
+                        var cache = readCache();
+                        var throttleObj = throttleData;
+                        
+                        if (cache) {
+                            cache.throttle = throttleObj;
+                            cache.ts = new Date().getTime();
+                            try {
+                                localStorage.setItem(CACHE_KEY, JSON.stringify(cache) );
+                            } catch (e) {}
+                        }
+                        
+                        var limit = throttleObj.your_request_limit || 15;
+                        var currentUse = throttleObj.current_use || 0;
+                        
+                        if (currentUse >= limit) {
+                            if (cache && cache.data) {
+                                renderData(cache.data);
+                            }
+                            var retryDelay = (throttleObj.next_use_secs > 0) ? (throttleObj.next_use_secs + 5) * 1000 : 300000;
+                            window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
+                            return;
+                        }
+                        
+                        doFetchLaunch(throttleObj);
+                    } )
+                    .catch(function() {
+                        doFetchLaunch(null);
+                    } );
+            }
 
+            function doFetchLaunch(throttleObj) {
                 fetch(API_URL)
                     .then(function(res) {
                         if (res.status === 429) {
@@ -229,13 +239,16 @@
                         return res.json();
                     } )
                     .then(function(data) {
-                        writeCache(data);
+                        writeCache(data, throttleObj);
                         var matchedLaunch = renderData(data);
-
-                        /* Always fetch throttle info (free call, not rate-limited) */
-                        fetchThrottleInfo();
-
-                        scheduleNext(matchedLaunch);
+                        
+                        var cache = readCache();
+                        var interval = getDynamicTTL(matchedLaunch, cache ? cache.throttle : throttleObj);
+                        
+                        if (window.spaceWidgetFetchTimeout) {
+                            clearTimeout(window.spaceWidgetFetchTimeout);
+                        }
+                        window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, interval);
                     } )
                     .catch(function(e) {
                         var retryDelay = 30000;
@@ -263,6 +276,7 @@
                         avatarEl.style.display = 'none';
                         timerEl.style.display = 'none';
                         statusEl.style.display = 'none';
+                        warningBoxEl.style.display = 'none';
                         window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
                     } );
             }
@@ -339,21 +353,34 @@
                         'To Be Determined': t.statusTbd,
                         'Launch Successful': t.statusSuccess,
                         'TBC': t.statusTbc,
-                        'In Flight': t.statusInFlight
+                        'In Flight': t.statusInFlight,
+                        'Hold': t.statusHold,
+                        'Launch Pending': t.statusPending,
+                        'Postponed': t.statusPostponed,
+                        'Suspended': t.statusSuspended,
+                        'Cancelled': t.statusCancelled
                     };
 
                     var rawStatus = (launch.status && launch.status.name) ? launch.status.name : '';
-                    statusEl.textContent = statusMap[rawStatus] || rawStatus || t.statusUnknown;
+                    var statusText = statusMap[rawStatus] || rawStatus || t.statusUnknown;
+                    if (launch.probability !== null && launch.probability !== undefined && launch.probability > 0) {
+                        statusText += ' (' + launch.probability + '% ' + t.weather + ')';
+                    }
+                    statusEl.textContent = statusText;
 
                     var statusName = rawStatus.toLowerCase();
-                    if (statusName.indexOf('go') === -1 && statusName.indexOf('success') === -1) {
-                        statusEl.style.background = 'rgba(245, 158, 11, 0.15)';
-                        statusEl.style.color = '#fbbf24';
-                        statusEl.style.borderColor = 'rgba(245, 158, 11, 0.3)';
-                    } else {
+                    if (statusName.indexOf('cancel') !== -1 || statusName.indexOf('fail') !== -1) {
+                        statusEl.style.background = 'rgba(239, 68, 68, 0.15)';
+                        statusEl.style.color = '#f87171';
+                        statusEl.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                    } else if (statusName.indexOf('go') !== -1 || statusName.indexOf('success') !== -1 || statusName.indexOf('flight') !== -1) {
                         statusEl.style.background = 'rgba(16, 185, 129, 0.15)';
                         statusEl.style.color = '#34d399';
                         statusEl.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                    } else {
+                        statusEl.style.background = 'rgba(245, 158, 11, 0.15)';
+                        statusEl.style.color = '#fbbf24';
+                        statusEl.style.borderColor = 'rgba(245, 158, 11, 0.3)';
                     }
 
                     if (launch.image && (launch.image.thumbnail_url || launch.image.image_url)) {
@@ -361,6 +388,27 @@
                         avatarEl.style.display = 'block';
                     } else {
                         avatarEl.style.display = 'none';
+                    }
+
+                    var warningText = '';
+                    var lang = langCode || 'en';
+                    var holdLabel = i18n[lang].holdReason || i18n['en'].holdReason || 'Hold Reason: ';
+                    var failLabel = i18n[lang].failReason || i18n['en'].failReason || 'Failure Reason: ';
+                    var weatherLabel = i18n[lang].weatherConcern || i18n['en'].weatherConcern || 'Weather Concern: ';
+
+                    if (launch.holdreason) {
+                        warningText = holdLabel + launch.holdreason;
+                    } else if (launch.failreason) {
+                        warningText = failLabel + launch.failreason;
+                    } else if (launch.weather_concerns) {
+                        warningText = weatherLabel + launch.weather_concerns;
+                    }
+
+                    if (warningText) {
+                        warningBoxEl.textContent = warningText;
+                        warningBoxEl.style.display = 'block';
+                    } else {
+                        warningBoxEl.style.display = 'none';
                     }
 
                     targetDate = new Date(launch.net).getTime();
@@ -380,6 +428,7 @@
                     avatarEl.style.display = 'none';
                     timerEl.style.display = 'none';
                     statusEl.style.display = 'none';
+                    warningBoxEl.style.display = 'none';
                 }
 
                 return launch;
@@ -408,21 +457,52 @@
             var initCache = readCache();
             if (initCache && initCache.data) {
                 var matchedLaunch = renderData(initCache.data);
-                var cacheAge = new Date().getTime() - (initCache.ts || 0);
-                var refreshInterval = getRefreshInterval(matchedLaunch);
-                if (cacheAge < refreshInterval) {
-                    /* Cache is fresh within the dynamic TTL, skip initial fetch */
-                    var remaining = refreshInterval - cacheAge;
-                    if (window.spaceWidgetFetchTimeout) {
-                        clearTimeout(window.spaceWidgetFetchTimeout);
-                    }
-                    window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, remaining > 1000 ? remaining : 1000);
-                } else {
-                    /* Cache is stale but we rendered it for instant UX, now fetch fresh */
-                    fetchLaunch();
-                }
+                
+                /* Fetch throttle info (free call) to determine if cache is stale */
+                fetch(THROTTLE_URL)
+                    .then(function(res) {
+                        if (!res.ok) return null;
+                        return res.json();
+                    } )
+                    .then(function(throttleData) {
+                        var now = new Date().getTime();
+                        var cache = readCache() || initCache;
+                        if (throttleData && throttleData.your_request_limit !== undefined) {
+                            cache.throttle = throttleData;
+                            cache.ts = now;
+                            try {
+                                localStorage.setItem(CACHE_KEY, JSON.stringify(cache) );
+                            } catch (e) {}
+                        }
+                        
+                        var age = now - (cache.ts || 0);
+                        var ttl = getDynamicTTL(matchedLaunch, cache.throttle);
+                        
+                        if (age >= ttl) {
+                            fetchLaunch();
+                        } else {
+                            var remaining = ttl - age;
+                            if (window.spaceWidgetFetchTimeout) {
+                                clearTimeout(window.spaceWidgetFetchTimeout);
+                            }
+                            window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, remaining > 1000 ? remaining : 1000);
+                        }
+                    } )
+                    .catch(function() {
+                        /* Fallback: if throttle check fails, calculate TTL using cached throttle */
+                        var age = new Date().getTime() - (initCache.ts || 0);
+                        var ttl = getDynamicTTL(matchedLaunch, initCache.throttle);
+                        if (age >= ttl) {
+                            fetchLaunch();
+                        } else {
+                            var remaining = ttl - age;
+                            if (window.spaceWidgetFetchTimeout) {
+                                clearTimeout(window.spaceWidgetFetchTimeout);
+                            }
+                            window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, remaining > 1000 ? remaining : 1000);
+                        }
+                    } );
             } else {
-                /* No cache, fetch immediately */
                 fetchLaunch();
             }
         } )();
