@@ -191,7 +191,7 @@
                     clearTimeout(window.spaceWidgetFetchTimeout);
                 }
 
-                fetch(THROTTLE_URL)
+                fetch(THROTTLE_URL, { cache: 'no-store' } )
                     .then(function(res) {
                         if (!res.ok) throw new Error('Throttle API failed');
                         return res.json();
@@ -227,7 +227,7 @@
             }
 
             function doFetchLaunch(throttleObj) {
-                fetch(API_URL)
+                fetch(API_URL, { cache: 'no-store' } )
                     .then(function(res) {
                         if (res.status === 429) {
                             return res.json().then(function(errData) {
