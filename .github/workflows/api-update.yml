@@ -20,7 +20,7 @@ jobs:
         id: check_version
         run: |
           LATEST_VERSION=$(curl -s https://ll.thespacedevs.com/docs/ | grep -oP 'url: "/\K[0-9]+\.[0-9]+\.[0-9]+(?=/json")')
-          CURRENT_VERSION=$(grep -oP 'thespacedevs\.com/\K[0-9]+\.[0-9]+\.[0-9]+' src/widget.html)
+          CURRENT_VERSION=$(grep -oP 'thespacedevs\.com/\K[0-9]+\.[0-9]+\.[0-9]+' src/widget.html | head -n 1)
 
           if [ -z "$LATEST_VERSION" ]; then
             echo "Could not fetch latest version from thespacedevs.com"

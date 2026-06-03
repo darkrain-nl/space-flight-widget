@@ -35,8 +35,9 @@
 
     <script>
         (function () {
-            var API_URL = 'https://ll.thespacedevs.com/2.3.0/launches/upcoming/?limit=50';
-            var THROTTLE_URL = 'https://ll.thespacedevs.com/2.3.0/api-throttle/';
+            var API_BASE = 'https://ll.thespacedevs.com/2.3.0';
+            var API_URL = API_BASE + '/launches/upcoming/?limit=50';
+            var THROTTLE_URL = API_BASE + '/api-throttle/';
             var CACHE_KEY = 'space_launch_cache';
             var widgetEl = document.getElementById('space-countdown-widget');
             var langCode = (widgetEl.getAttribute('data-lang') || 'en').toLowerCase();
