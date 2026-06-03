@@ -202,7 +202,6 @@
                         
                         if (cache) {
                             cache.throttle = throttleObj;
-                            cache.ts = new Date().getTime();
                             try {
                                 localStorage.setItem(CACHE_KEY, JSON.stringify(cache) );
                             } catch (e) {}
@@ -457,51 +456,19 @@
             var initCache = readCache();
             if (initCache && initCache.data) {
                 var matchedLaunch = renderData(initCache.data);
+                var now = new Date().getTime();
+                var age = now - (initCache.ts || 0);
+                var ttl = getDynamicTTL(matchedLaunch, initCache.throttle);
                 
-                /* Fetch throttle info (free call) to determine if cache is stale */
-                fetch(THROTTLE_URL)
-                    .then(function(res) {
-                        if (!res.ok) return null;
-                        return res.json();
-                    } )
-                    .then(function(throttleData) {
-                        var now = new Date().getTime();
-                        var cache = readCache() || initCache;
-                        if (throttleData && throttleData.your_request_limit !== undefined) {
-                            cache.throttle = throttleData;
-                            cache.ts = now;
-                            try {
-                                localStorage.setItem(CACHE_KEY, JSON.stringify(cache) );
-                            } catch (e) {}
-                        }
-                        
-                        var age = now - (cache.ts || 0);
-                        var ttl = getDynamicTTL(matchedLaunch, cache.throttle);
-                        
-                        if (age >= ttl) {
-                            fetchLaunch();
-                        } else {
-                            var remaining = ttl - age;
-                            if (window.spaceWidgetFetchTimeout) {
-                                clearTimeout(window.spaceWidgetFetchTimeout);
-                            }
-                            window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, remaining > 1000 ? remaining : 1000);
-                        }
-                    } )
-                    .catch(function() {
-                        /* Fallback: if throttle check fails, calculate TTL using cached throttle */
-                        var age = new Date().getTime() - (initCache.ts || 0);
-                        var ttl = getDynamicTTL(matchedLaunch, initCache.throttle);
-                        if (age >= ttl) {
-                            fetchLaunch();
-                        } else {
-                            var remaining = ttl - age;
-                            if (window.spaceWidgetFetchTimeout) {
-                                clearTimeout(window.spaceWidgetFetchTimeout);
-                            }
-                            window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, remaining > 1000 ? remaining : 1000);
-                        }
-                    } );
+                if (age >= ttl) {
+                    fetchLaunch();
+                } else {
+                    var remaining = ttl - age;
+                    if (window.spaceWidgetFetchTimeout) {
+                        clearTimeout(window.spaceWidgetFetchTimeout);
+                    }
+                    window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, remaining > 1000 ? remaining : 1000);
+                }
             } else {
                 fetchLaunch();
             }
