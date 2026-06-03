@@ -9,8 +9,12 @@
                 <div id="space-status" style="display: none; font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">--</div>
             </div>
         </div>
-        <div id="space-timer" style="display: none; gap: 12px; flex-shrink: 0; margin: 0 auto;">
-        <div style="display: flex; flex-direction: column; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5rem; border-radius: 8px; min-width: 50px;">
+        <div id="space-timer" style="display: none; gap: 12px; flex-shrink: 0; margin: 0 auto; align-items: flex-start;">
+            <div style="display: flex; flex-direction: column; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5rem; border-radius: 8px; min-width: 45px;">
+                <span id="space-sign" style="font-size: 1.5rem; font-weight: 700; color: #a5b4fc; line-height: 1; margin-bottom: 4px;">T-</span>
+                <span style="font-size: 0.65rem; color: transparent; user-select: none; -webkit-user-select: none; -moz-user-select: none;">SIGN</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5rem; border-radius: 8px; min-width: 50px;">
             <span id="space-d" style="font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 4px;">00</span>
             <span id="space-lbl-d" style="font-size: 0.65rem; color: #94a3b8; letter-spacing: 0.5px;">DAYS</span>
         </div>
@@ -74,6 +78,7 @@
             var hEl = document.getElementById('space-h');
             var mEl = document.getElementById('space-m');
             var sEl = document.getElementById('space-s');
+            var signEl = document.getElementById('space-sign');
             
             var lblDEl = document.getElementById('space-lbl-d');
             var lblHEl = document.getElementById('space-lbl-h');
@@ -458,7 +463,7 @@
                 mEl.textContent = (m < 10 ? '0' : '') + m;
                 sEl.textContent = (s < 10 ? '0' : '') + s;
 
-                titleEl.textContent = t.upcoming + (isCountUp ? ' • T+' : ' • T-');
+                signEl.textContent = isCountUp ? 'T+' : 'T-';
             }
 
             /* Cache-first initialization: render from cache if within TTL, then fetch */
