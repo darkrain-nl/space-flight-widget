@@ -86,8 +86,6 @@
             attrLinkEl.textContent = t.attribution;
 
             var targetDate;
-            var fetchCount = 0;
-            var lastMatchedLaunch = null;
 
             /* Clear any active timers/timeouts from prior script runs on the page */
             if (window.spaceWidgetTimerInterval) {
@@ -97,28 +95,20 @@
                 clearTimeout(window.spaceWidgetFetchTimeout);
             }
 
-            /* Returns { interval: ms, skipThrottle: boolean } based on launch proximity */
+            /* Returns interval in ms based on launch proximity */
             function getRefreshInterval(launch) {
                 if (!launch || !launch.net) {
-                    return { interval: 1800000, skipThrottle: false };
+                    return 1800000;
                 }
                 var now = new Date().getTime();
                 var launchTime = new Date(launch.net).getTime();
                 var hoursAway = (launchTime - now) / 3600000;
 
-                if (hoursAway < 1) {
-                    return { interval: 300000, skipThrottle: true };
-                }
-                if (hoursAway < 6) {
-                    return { interval: 480000, skipThrottle: false };
-                }
-                if (hoursAway < 24) {
-                    return { interval: 720000, skipThrottle: false };
-                }
-                if (hoursAway < 72) {
-                    return { interval: 900000, skipThrottle: false };
-                }
-                return { interval: 1200000, skipThrottle: false };
+                if (hoursAway < 1) return 300000;
+                if (hoursAway < 6) return 480000;
+                if (hoursAway < 24) return 720000;
+                if (hoursAway < 72) return 900000;
+                return 1200000;
             }
 
             /* Read the structured cache from localStorage */
@@ -182,7 +172,6 @@
                             var cache = readCache();
                             if (cache) {
                                 cache.throttle = throttleData;
-                                cache.ts = new Date().getTime();
                                 try {
                                     localStorage.setItem(CACHE_KEY, JSON.stringify(cache) );
                                 } catch (e) {}
@@ -193,8 +182,7 @@
             }
 
             function scheduleNext(launch) {
-                var schedule = getRefreshInterval(launch);
-                var interval = schedule.interval;
+                var interval = getRefreshInterval(launch);
 
                 /* Check if throttle data forces a longer delay */
                 var cache = readCache();
@@ -243,14 +231,9 @@
                     .then(function(data) {
                         writeCache(data);
                         var matchedLaunch = renderData(data);
-                        lastMatchedLaunch = matchedLaunch;
 
-                        /* Conditionally fetch throttle info every 3rd successful call */
-                        fetchCount++;
-                        var schedule = getRefreshInterval(matchedLaunch);
-                        if (fetchCount % 3 === 0 && !schedule.skipThrottle) {
-                            fetchThrottleInfo();
-                        }
+                        /* Always fetch throttle info (free call, not rate-limited) */
+                        fetchThrottleInfo();
 
                         scheduleNext(matchedLaunch);
                     } )
@@ -285,119 +268,121 @@
             }
 
             function renderData(data) {
-                        var launch = null;
-                        var now = new Date().getTime();
-                        if (data && data.results && data.results.length !== undefined) {
-                            for (var i = 0; i < data.results.length; i++) {
-                            var l = data.results[i];
-                            var r = '';
-                            var f = '';
-                            if (l.rocket && l.rocket.configuration) {
-                                r = (l.rocket.configuration.name || '').toLowerCase();
-                                f = (l.rocket.configuration.family || '').toLowerCase();
-                            }
-                            
-                            var isAllowed = ALLOWED_ROCKETS.length === 0;
-                            for (var j = 0; j < ALLOWED_ROCKETS.length; j++) {
-                                if (r.indexOf(ALLOWED_ROCKETS[j]) !== -1 || f.indexOf(ALLOWED_ROCKETS[j]) !== -1) {
-                                    isAllowed = true;
-                                    break;
-                                }
-                            }
-                            
-                            var launchTime = new Date(l.net).getTime();
-                            var daysAway = (launchTime - now) / (1000 * 60 * 60 * 24);
-                            
-                            var isFuture = launchTime > now;
-                            var isSoon = daysAway <= MAX_DAYS;
-                            
-                            if (isAllowed && isFuture && isSoon) {
-                                launch = l;
+                var launch = null;
+                var now = new Date().getTime();
+                if (data && data.results && data.results.length !== undefined) {
+                    for (var i = 0; i < data.results.length; i++) {
+                        var l = data.results[i];
+                        var r = '';
+                        var f = '';
+                        if (l.rocket && l.rocket.configuration) {
+                            r = (l.rocket.configuration.name || '').toLowerCase();
+                            f = (l.rocket.configuration.family || '').toLowerCase();
+                        }
+
+                        var isAllowed = ALLOWED_ROCKETS.length === 0;
+                        for (var j = 0; j < ALLOWED_ROCKETS.length; j++) {
+                            if (r.indexOf(ALLOWED_ROCKETS[j]) !== -1 || f.indexOf(ALLOWED_ROCKETS[j]) !== -1) {
+                                isAllowed = true;
                                 break;
                             }
                         }
+
+                        var launchTime = new Date(l.net).getTime();
+                        var daysAway = (launchTime - now) / (1000 * 60 * 60 * 24);
+
+                        var isFuture = launchTime > now;
+                        var isSoon = daysAway <= MAX_DAYS;
+
+                        if (isAllowed && isFuture && isSoon) {
+                            launch = l;
+                            break;
                         }
+                    }
+                }
 
-                        if (launch) {
-                            titleEl.textContent = t.upcoming;
-                            nameEl.textContent = launch.name;
-                            if (launch.slug && typeof launch.slug === 'string') {
-                                nameEl.href = 'https://spacelaunchnow.me/launch/' + encodeURIComponent(launch.slug);
-                            } else {
-                                nameEl.removeAttribute('href');
-                            }
-                            
-                            var provider = (launch.launch_service_provider && launch.launch_service_provider.name) ? String(launch.launch_service_provider.name) : '';
-                            var padName = (launch.pad && launch.pad.name) ? String(launch.pad.name) : '';
-                            var locName = (launch.pad && launch.pad.location && launch.pad.location.name) ? String(launch.pad.location.name) : '';
-                            
-                            var padStr = padName;
-                            if (locName && padName.indexOf(locName) === -1) {
-                                padStr += ', ' + locName;
-                            }
-                            var provPadText = '';
-                            if (provider && padStr) {
-                                provPadText = provider + ' • ' + padStr;
-                            } else if (provider) {
-                                provPadText = provider;
-                            } else if (padStr) {
-                                provPadText = padStr;
-                            }
-                            
-                            if (provPadText) {
-                                providerPadEl.textContent = provPadText;
-                                providerPadEl.style.display = 'block';
-                            } else {
-                                providerPadEl.style.display = 'none';
-                            }
-                            
+                if (launch) {
+                    titleEl.textContent = t.upcoming;
+                    nameEl.textContent = launch.name;
+                    if (launch.slug && typeof launch.slug === 'string') {
+                        nameEl.href = 'https://spacelaunchnow.me/launch/' + encodeURIComponent(launch.slug);
+                    } else {
+                        nameEl.removeAttribute('href');
+                    }
 
-                            
-                            var statusMap = {
-                                'Go for Launch': t.statusReady,
-                                'To Be Determined': t.statusTbd,
-                                'Launch Successful': t.statusSuccess,
-                                'TBC': t.statusTbc,
-                                'In Flight': t.statusInFlight
-                            };
-                            
-                            var rawStatus = (launch.status && launch.status.name) ? launch.status.name : '';
-                            statusEl.textContent = statusMap[rawStatus] || rawStatus || t.statusUnknown;
+                    var provider = (launch.launch_service_provider && launch.launch_service_provider.name) ? String(launch.launch_service_provider.name) : '';
+                    var padName = (launch.pad && launch.pad.name) ? String(launch.pad.name) : '';
+                    var locName = (launch.pad && launch.pad.location && launch.pad.location.name) ? String(launch.pad.location.name) : '';
 
-                            var statusName = rawStatus.toLowerCase();
-                            if (statusName.indexOf('go') === -1 && statusName.indexOf('success') === -1) {
-                                statusEl.style.background = 'rgba(245, 158, 11, 0.15)';
-                                statusEl.style.color = '#fbbf24';
-                                statusEl.style.borderColor = 'rgba(245, 158, 11, 0.3)';
-                            }
+                    var padStr = padName;
+                    if (locName && padName.indexOf(locName) === -1) {
+                        padStr += ', ' + locName;
+                    }
+                    var provPadText = '';
+                    if (provider && padStr) {
+                        provPadText = provider + ' • ' + padStr;
+                    } else if (provider) {
+                        provPadText = provider;
+                    } else if (padStr) {
+                        provPadText = padStr;
+                    }
 
-                            if (launch.image && (launch.image.thumbnail_url || launch.image.image_url)) {
-                                avatarEl.src = encodeURI(String(launch.image.thumbnail_url || launch.image.image_url) );
-                                avatarEl.style.display = 'block';
-                            } else {
-                                avatarEl.style.display = 'none';
-                            }
+                    if (provPadText) {
+                        providerPadEl.textContent = provPadText;
+                        providerPadEl.style.display = 'block';
+                    } else {
+                        providerPadEl.style.display = 'none';
+                    }
 
-                            targetDate = new Date(launch.net).getTime();
-                            timerEl.style.display = 'flex';
-                            statusEl.style.display = 'inline-block';
+                    var statusMap = {
+                        'Go for Launch': t.statusReady,
+                        'To Be Determined': t.statusTbd,
+                        'Launch Successful': t.statusSuccess,
+                        'TBC': t.statusTbc,
+                        'In Flight': t.statusInFlight
+                    };
 
-                            updateTimer();
-                            if (window.spaceWidgetTimerInterval) {
-                                clearInterval(window.spaceWidgetTimerInterval);
-                            }
-                            window.spaceWidgetTimerInterval = setInterval(updateTimer, 1000);
-                        } else {
-                            titleEl.textContent = t.noneScheduled;
-                            nameEl.textContent = t.checkLater;
-                            nameEl.removeAttribute('href');
-                            providerPadEl.style.display = 'none';
-                            avatarEl.style.display = 'none';
-                            timerEl.style.display = 'none';
-                            statusEl.style.display = 'none';
-                        }
+                    var rawStatus = (launch.status && launch.status.name) ? launch.status.name : '';
+                    statusEl.textContent = statusMap[rawStatus] || rawStatus || t.statusUnknown;
 
-                        return launch;
+                    var statusName = rawStatus.toLowerCase();
+                    if (statusName.indexOf('go') === -1 && statusName.indexOf('success') === -1) {
+                        statusEl.style.background = 'rgba(245, 158, 11, 0.15)';
+                        statusEl.style.color = '#fbbf24';
+                        statusEl.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+                    } else {
+                        statusEl.style.background = 'rgba(16, 185, 129, 0.15)';
+                        statusEl.style.color = '#34d399';
+                        statusEl.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                    }
+
+                    if (launch.image && (launch.image.thumbnail_url || launch.image.image_url)) {
+                        avatarEl.src = encodeURI(String(launch.image.thumbnail_url || launch.image.image_url) );
+                        avatarEl.style.display = 'block';
+                    } else {
+                        avatarEl.style.display = 'none';
+                    }
+
+                    targetDate = new Date(launch.net).getTime();
+                    timerEl.style.display = 'flex';
+                    statusEl.style.display = 'inline-block';
+
+                    updateTimer();
+                    if (window.spaceWidgetTimerInterval) {
+                        clearInterval(window.spaceWidgetTimerInterval);
+                    }
+                    window.spaceWidgetTimerInterval = setInterval(updateTimer, 1000);
+                } else {
+                    titleEl.textContent = t.noneScheduled;
+                    nameEl.textContent = t.checkLater;
+                    nameEl.removeAttribute('href');
+                    providerPadEl.style.display = 'none';
+                    avatarEl.style.display = 'none';
+                    timerEl.style.display = 'none';
+                    statusEl.style.display = 'none';
+                }
+
+                return launch;
             }
 
             function updateTimer() {
@@ -423,12 +408,11 @@
             var initCache = readCache();
             if (initCache && initCache.data) {
                 var matchedLaunch = renderData(initCache.data);
-                lastMatchedLaunch = matchedLaunch;
                 var cacheAge = new Date().getTime() - (initCache.ts || 0);
-                var schedule = getRefreshInterval(matchedLaunch);
-                if (cacheAge < schedule.interval) {
+                var refreshInterval = getRefreshInterval(matchedLaunch);
+                if (cacheAge < refreshInterval) {
                     /* Cache is fresh within the dynamic TTL, skip initial fetch */
-                    var remaining = schedule.interval - cacheAge;
+                    var remaining = refreshInterval - cacheAge;
                     if (window.spaceWidgetFetchTimeout) {
                         clearTimeout(window.spaceWidgetFetchTimeout);
                     }
