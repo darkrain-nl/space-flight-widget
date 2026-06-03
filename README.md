@@ -24,7 +24,7 @@ Embed upcoming heavy-lift rocket launches directly into your forum or website. A
 - **BBCode Compatible**: Built entirely with inline styles and ES5 Javascript to bypass strict forum sanitizers and `[html]` tags.
 - **Smart Logic**: Automatically displays a fallback message if there isn't a launch scheduled within the configured time window (default: 7 days, configurable via `data-days`).
 - **Offline & Rate-Limit Resilient**: Caches launch data in `localStorage`. If the API hits rate limits (HTTP 429) or goes offline, the widget gracefully falls back to the cached data to keep the countdown ticking seamlessly.
-- **Auto-Refreshing**: Refreshes data automatically every 5 minutes in the background.
+- **Smart Auto-Refreshing**: Adapts refresh intervals based on launch proximity (from 5 minutes near T-0 up to 30 minutes when days away) and rate limits, saving API request budget while staying responsive.
 - **Zero Dependencies**: Pure HTML and JavaScript. No external CSS stylesheets or libraries required.
 
 ## 🛠️ How to Embed
