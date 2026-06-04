@@ -369,6 +369,9 @@
                         return res.json();
                     } )
                     .then(function(data) {
+                        if (throttleObj) {
+                            throttleObj.current_use = (throttleObj.current_use || 0) + 1;
+                        }
                         writeCache(data, throttleObj);
                         lastFetchTime = new Date().getTime();
                         currentThrottle = throttleObj;
