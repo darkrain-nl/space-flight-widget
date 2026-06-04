@@ -36,6 +36,17 @@ class TestBuildMinifier(unittest.TestCase):
             minify_code(sample_code)
         self.assertIn("single-line JS comment", str(ctx.exception))
 
+    def test_script_attributes_and_case_validation(self):
+        # Test that mixed case and attributes are matched and validated
+        sample_code = """
+        <SCRIPT type="text/javascript">
+            var x = 5; // This single line comment should throw even in uppercase/attr tags
+        </SCRIPT>
+        """
+        with self.assertRaises(ValueError) as ctx:
+            minify_code(sample_code)
+        self.assertIn("single-line JS comment", str(ctx.exception))
+
     def test_url_slashes_do_not_throw(self):
         sample_code = """
         <script>

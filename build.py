@@ -29,7 +29,7 @@ def validate_script(script, i):
 
 def minify_code(source_code):
     # Syntax and comment validation checks on Javascript blocks
-    scripts = re.findall(r'<script>(.*?)</script>', source_code, re.DOTALL)
+    scripts = re.findall(r'<script\b[^>]*>(.*?)</script\b[^>]*>', source_code, flags=re.DOTALL | re.IGNORECASE)
     for i, script in enumerate(scripts, 1):
         validate_script(script, i)
 
