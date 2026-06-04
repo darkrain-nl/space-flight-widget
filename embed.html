@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://thespacedevs-prod.nyc3.digitaloceanspaces.com; script-src 'self' 'unsafe-inline'; connect-src 'self' https://ll.thespacedevs.com; style-src 'self' 'unsafe-inline';">
+    <title>Space Flight Widget Embed</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            font-family: 'Inter', system-ui, sans-serif;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        
+        .widget-wrapper {
+            width: 100%;
+            max-width: 700px;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-wrapper" id="widget-container"></div>
+    
+    <script>
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+            
+            // 1. Language validation (allow-list only)
+            var lang = (params.get('lang') || 'en').toLowerCase();
+            var allowedLangs = ['en', 'fr', 'it', 'de', 'es', 'nl'];
+            if (allowedLangs.indexOf(lang) === -1) {
+                lang = 'en';
+            }
+            
+            // 2. Days validation (positive integer up to 365)
+            var days = parseInt(params.get('days'), 10);
+            if (isNaN(days) || days <= 0 || days > 365) {
+                days = 7;
+            }
+            
+            // 3. Rockets validation (safe characters only: letters, numbers, spaces, hyphens, commas)
+            var rockets = params.get('rockets') || '';
+            if (rockets) {
+                var rocketList = rockets.split(',')
+                    .map(function(r) { return r.trim().toLowerCase(); })
+                    .filter(function(r) { return /^[a-z0-9\s\-]+$/.test(r); });
+                rockets = rocketList.join(',');
+            }
+            
+            // 4. Background color validation
+            var bg = params.get('bg');
+            var safeBg = null;
+            if (bg) {
+                bg = bg.trim();
+                if (bg === 'transparent') {
+                    safeBg = 'transparent';
+                } else if (/^#[0-9a-fA-F]{3,8}$/.test(bg)) {
+                    safeBg = bg;
+                } else if (/^rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*(?:,\s*[0-9\.]+\s*)?\)$/.test(bg)) {
+                    safeBg = bg;
+                } else if (/^[a-zA-Z]+$/.test(bg)) {
+                    safeBg = bg;
+                }
+            }
+            
+            // 5. Attribution flag
+            var hideAttr = params.get('hide_attribution') === 'true' || params.get('hide_attr') === 'true';
+
+            // Fetch and inject widget
+            fetch('dist/widget.min.html')
+                .then(function(res) {
+                    if (!res.ok) throw new Error('Failed to load widget source');
+                    return res.text();
+                })
+                .then(function(html) {
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(html, 'text/html');
+                    var widget = doc.querySelector('#space-countdown-widget');
+                    
+                    if (widget) {
+                        // Set attributes safely on DOM element before injecting into body
+                        widget.setAttribute('data-lang', lang);
+                        if (rockets) {
+                            widget.setAttribute('data-rockets', rockets);
+                        } else {
+                            widget.removeAttribute('data-rockets');
+                        }
+                        widget.setAttribute('data-days', String(days));
+                        
+                        if (safeBg) {
+                            if (safeBg === 'transparent') {
+                                widget.style.background = 'transparent';
+                                widget.style.border = 'none';
+                                widget.style.boxShadow = 'none';
+                            } else {
+                                widget.style.background = safeBg;
+                            }
+                        }
+
+                        if (hideAttr) {
+                            var attr = doc.getElementById('space-attribution');
+                            if (attr) {
+                                attr.style.display = 'none';
+                            }
+                        }
+                        
+                        var widgetContainer = document.getElementById('widget-container');
+                        widgetContainer.replaceChildren(widget);
+                        
+                        // Execute script block safely
+                        var scripts = widgetContainer.getElementsByTagName('script');
+                        for (var i = 0; i < scripts.length; i++) {
+                            var newScript = document.createElement('script');
+                            newScript.text = scripts[i].text;
+                            document.body.appendChild(newScript).parentNode.removeChild(newScript);
+                        }
+                    }
+                })
+                .catch(function(err) {
+                    var errBox = document.createElement('div');
+                    errBox.textContent = 'Error loading space flight widget: ' + err.message;
+                    errBox.style.color = '#ef4444';
+                    errBox.style.fontFamily = 'sans-serif';
+                    errBox.style.fontSize = '0.9rem';
+                    var container = document.getElementById('widget-container');
+                    if (container) {
+                        container.replaceChildren(errBox);
+                    }
+                });
+        })();
+    </script>
+</body>
+</html>
