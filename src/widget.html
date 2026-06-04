@@ -40,7 +40,8 @@
 
     <div id="space-warning-box" style="display: none; font-size: 0.7rem; color: #f87171; margin-top: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 12px; border-radius: 8px; text-align: left; width: 100%; box-sizing: border-box;"></div>
 
-    <div id="space-attribution" style="margin-top: 1.5rem; font-size: 0.65rem; text-align: right; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.8rem;">
+    <div id="space-attribution" style="margin-top: 1.5rem; font-size: 0.65rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.8rem;">
+        <div id="space-meta-info" style="color: #64748b; text-align: left; font-family: inherit;"></div>
         <a id="space-attr-link" href="https://thespacedevs.com/" target="_blank" rel="noopener noreferrer" style="color: #64748b; text-decoration: none;">Data by The Space Devs</a>
     </div>
 
@@ -62,12 +63,12 @@
                 : 7;
 
             var i18n = {
-                en: { loading: "Loading...", days: "DAYS", hours: "HOURS", mins: "MINS", secs: "SECS", upcoming: "Upcoming Launch", statusReady: "Go for Launch", statusTbd: "To Be Determined", statusSuccess: "Launch Successful", statusTbc: "TBC", statusInFlight: "In Flight", statusUnknown: "Unknown Status", statusHold: "On Hold", statusPending: "Pending", statusPostponed: "Postponed", statusSuspended: "Suspended", statusCancelled: "Cancelled", noneScheduled: "No Launch Scheduled", checkLater: "Check back later", errorLoad: "Error loading data", errorTry: "Try again later", errorRateLimit: "Rate limit exceeded. We will try again later.", attribution: "Data by The Space Devs", weather: "Weather", holdReason: "Hold Reason: ", failReason: "Failure Reason: ", weatherConcern: "Weather Concern: " },
-                fr: { loading: "Chargement...", days: "JOURS", hours: "HEURES", mins: "MIN", secs: "SEC", upcoming: "Lancement à venir", statusReady: "Prêt pour le lancement", statusTbd: "À déterminer", statusSuccess: "Lancement réussi", statusTbc: "À confirmer", statusInFlight: "En vol", statusUnknown: "Statut inconnu", statusHold: "En attente", statusPending: "En attente de lancement", statusPostponed: "Reporté", statusSuspended: "Suspendu", statusCancelled: "Annulé", noneScheduled: "Aucun lancement prévu", checkLater: "Revenez plus tard", errorLoad: "Erreur de chargement", errorTry: "Réessayez plus tard", errorRateLimit: "Limite de requêtes atteinte. Nous réessayerons plus tard.", attribution: "Données par The Space Devs", weather: "Météo", holdReason: "Motif d'attente : ", failReason: "Motif d'échec : ", weatherConcern: "Problème météo : " },
-                it: { loading: "Caricamento...", days: "GIORNI", hours: "ORE", mins: "MIN", secs: "SEC", upcoming: "Lancio imminente", statusReady: "Pronto al lancio", statusTbd: "Da definire", statusSuccess: "Lancio riuscito", statusTbc: "Da confermare", statusInFlight: "In volo", statusUnknown: "Stato sconosciuto", statusHold: "In attesa", statusPending: "In sospeso", statusPostponed: "Posticipato", statusSuspended: "Sospeso", statusCancelled: "Annullato", noneScheduled: "Nessun lancio programmato", checkLater: "Riprova più tardi", errorLoad: "Errore di caricamento", errorTry: "Riprova più tardi", errorRateLimit: "Limite di richieste superato. Riproveremo più tardi.", attribution: "Dati di The Space Devs", weather: "Meteo", holdReason: "Motivo attesa: ", failReason: "Motivo fallimento: ", weatherConcern: "Allerta meteo: " },
-                de: { loading: "Laden...", days: "TAGE", hours: "STD", mins: "MIN", secs: "SEK", upcoming: "Bevorstehender Start", statusReady: "Bereit zum Start", statusTbd: "Noch zu bestimmen", statusSuccess: "Start erfolgreich", statusTbc: "Zu bestätigen", statusInFlight: "Im Flug", statusUnknown: "Unbekannter Status", statusHold: "Angehalten", statusPending: "Ausstehend", statusPostponed: "Verschoben", statusSuspended: "Ausgesetzt", statusCancelled: "Abgesagt", noneScheduled: "Kein Start geplant", checkLater: "Schauen Sie später wieder vorbei", errorLoad: "Fehler beim Laden", errorTry: "Später erneut versuchen", errorRateLimit: "Ratenlimit überschritten. Wir versuchen es später erneut.", attribution: "Daten von The Space Devs", weather: "Wetter", holdReason: "Grund für Halten: ", failReason: "Grund für Fehlschlag: ", weatherConcern: "Wettersorge: " },
-                es: { loading: "Cargando...", days: "DÍAS", hours: "HORAS", mins: "MIN", secs: "SEG", upcoming: "Próximo Lanzamiento", statusReady: "Listo para el lanzamiento", statusTbd: "Por determinar", statusSuccess: "Lanzamiento exitoso", statusTbc: "Por confirmar", statusInFlight: "En vuelo", statusUnknown: "Estado desconocido", statusHold: "En espera", statusPending: "Pendiente", statusPostponed: "Pospuesto", statusSuspended: "Suspendido", statusCancelled: "Cancelado", noneScheduled: "Ningún lanzamiento programado", checkLater: "Vuelve más tarde", errorLoad: "Error al cargar los datos", errorTry: "Inténtalo de nuevo más tarde", errorRateLimit: "Límite de solicitudes excedido. Lo intentaremos de nuevo más tarde.", attribution: "Datos de The Space Devs", weather: "Clima", holdReason: "Razón de espera: ", failReason: "Razón de fallo: ", weatherConcern: "Alerta del clima: " },
-                nl: { loading: "Laden...", days: "DAGEN", hours: "UUR", mins: "MIN", secs: "SEC", upcoming: "Aankomende Lancering", statusReady: "Klaar voor Lancering", statusTbd: "Nog te bepalen", statusSuccess: "Lancering Succesvol", statusTbc: "Nog te bevestigen", statusInFlight: "In de Vlucht", statusUnknown: "Onbekende Status", statusHold: "In de wacht", statusPending: "In afwachting", statusPostponed: "Uitgesteld", statusSuspended: "Geschorst", statusCancelled: "Geannuleerd", noneScheduled: "Geen Lancering Gepland", checkLater: "Kijk later nog eens", errorLoad: "Fout bij laden van gegevens", errorTry: "Probeer het later opnieuw", errorRateLimit: "Limiet overschreden. We proberen het later opnieuw.", attribution: "Gegevens via The Space Devs", weather: "Weer", holdReason: "Reden voor wacht: ", failReason: "Reden voor mislukking: ", weatherConcern: "Weerwaarschuwing: " }
+                en: { loading: "Loading...", days: "DAYS", hours: "HOURS", mins: "MINS", secs: "SECS", upcoming: "Upcoming Launch", statusReady: "Go for Launch", statusTbd: "To Be Determined", statusSuccess: "Launch Successful", statusTbc: "TBC", statusInFlight: "In Flight", statusUnknown: "Unknown Status", statusHold: "On Hold", statusPending: "Pending", statusPostponed: "Postponed", statusSuspended: "Suspended", statusCancelled: "Cancelled", noneScheduled: "No Launch Scheduled", checkLater: "Check back later", errorLoad: "Error loading data", errorTry: "Try again later", errorRateLimit: "Rate limit exceeded. We will try again later.", attribution: "Data by The Space Devs", weather: "Weather", holdReason: "Hold Reason: ", failReason: "Failure Reason: ", weatherConcern: "Weather Concern: ", metaUpdatedLessMin: "Updated <1m ago", metaUpdatedMin: "Updated {min}m ago", metaCalls: "{rem}/{lim} calls", metaRefreshing: "Refreshing...", metaNextMin: "Next in {min}m", metaNextSoon: "Next: soon" },
+                fr: { loading: "Chargement...", days: "JOURS", hours: "HEURES", mins: "MIN", secs: "SEC", upcoming: "Lancement à venir", statusReady: "Prêt pour le lancement", statusTbd: "À déterminer", statusSuccess: "Lancement réussi", statusTbc: "À confirmer", statusInFlight: "En vol", statusUnknown: "Statut inconnu", statusHold: "En attente", statusPending: "En attente de lancement", statusPostponed: "Reporté", statusSuspended: "Suspendu", statusCancelled: "Annulé", noneScheduled: "Aucun lancement prévu", checkLater: "Revenez plus tard", errorLoad: "Erreur de chargement", errorTry: "Réessayez plus tard", errorRateLimit: "Limite de requêtes atteinte. Nous réessayerons plus tard.", attribution: "Données par The Space Devs", weather: "Météo", holdReason: "Motif d'attente : ", failReason: "Motif d'échec : ", weatherConcern: "Problème météo : ", metaUpdatedLessMin: "Mis à jour <1m", metaUpdatedMin: "Mis à jour il y a {min}m", metaCalls: "{rem}/{lim} appels", metaRefreshing: "Mise à jour...", metaNextMin: "Suivant dans {min}m", metaNextSoon: "Suivant : bientôt" },
+                it: { loading: "Caricamento...", days: "GIORNI", hours: "ORE", mins: "MIN", secs: "SEC", upcoming: "Lancio imminente", statusReady: "Pronto al lancio", statusTbd: "Da definire", statusSuccess: "Lancio riuscito", statusTbc: "Da confermare", statusInFlight: "In volo", statusUnknown: "Stato sconosciuto", statusHold: "En attesa", statusPending: "In sospeso", statusPostponed: "Posticipato", statusSuspended: "Sospeso", statusCancelled: "Annullato", noneScheduled: "Nessun lancio programmato", checkLater: "Riprova più tardi", errorLoad: "Errore di caricamento", errorTry: "Riprova più tardi", errorRateLimit: "Limite di richieste superato. Riproveremo più tardi.", attribution: "Dati di The Space Devs", weather: "Meteo", holdReason: "Motivo attesa: ", failReason: "Motivo fallimento: ", weatherConcern: "Allerta meteo: ", metaUpdatedLessMin: "Aggiornato <1m fa", metaUpdatedMin: "Aggiornato {min}m fa", metaCalls: "{rem}/{lim} chiamate", metaRefreshing: "Aggiornamento...", metaNextMin: "Prossimo in {min}m", metaNextSoon: "Prossimo: breve" },
+                de: { loading: "Laden...", days: "TAGE", hours: "STD", mins: "MIN", secs: "SEK", upcoming: "Bevorstehender Start", statusReady: "Bereit zum Start", statusTbd: "Noch zu bestimmen", statusSuccess: "Start erfolgreich", statusTbc: "Zu bestätigen", statusInFlight: "Im Flug", statusUnknown: "Unbekannter Status", statusHold: "Angehalten", statusPending: "Ausstehend", statusPostponed: "Verschoben", statusSuspended: "Ausgesetzt", statusCancelled: "Abgesagt", noneScheduled: "Kein Start geplant", checkLater: "Schauen Sie später wieder vorbei", errorLoad: "Fehler beim Laden", errorTry: "Später erneut versuchen", errorRateLimit: "Ratenlimit überschritten. Wir versuchen es später erneut.", attribution: "Daten von The Space Devs", weather: "Wetter", holdReason: "Grund für Halten: ", failReason: "Grund für Fehlschlag: ", weatherConcern: "Wettersorge: ", metaUpdatedLessMin: "Aktualisiert <1m", metaUpdatedMin: "Vor {min}m aktualisiert", metaCalls: "{rem}/{lim} Anfragen", metaRefreshing: "Aktualisieren...", metaNextMin: "Nächster in {min}m", metaNextSoon: "Nächster: gleich" },
+                es: { loading: "Cargando...", days: "DÍAS", hours: "HORAS", mins: "MIN", secs: "SEG", upcoming: "Próximo Lanzamiento", statusReady: "Listo para el lanzamiento", statusTbd: "Por determinar", statusSuccess: "Lanzamiento exitoso", statusTbc: "Por confirmar", statusInFlight: "En vuelo", statusUnknown: "Estado desconocido", statusHold: "En espera", statusPending: "Pendiente", statusPostponed: "Pospuesto", statusSuspended: "Suspendido", statusCancelled: "Cancelado", noneScheduled: "Ningún lanzamiento programado", checkLater: "Vuelve más tarde", errorLoad: "Error al cargar los datos", errorTry: "Inténtalo de nuevo más tarde", errorRateLimit: "Límite de solicitudes excedido. Lo intentaremos de nuevo más tarde.", attribution: "Datos de The Space Devs", weather: "Clima", holdReason: "Razón de espera: ", failReason: "Razón de fallo: ", weatherConcern: "Alerta del clima: ", metaUpdatedLessMin: "Actualizado <1m", metaUpdatedMin: "Actualizado hace {min}m", metaCalls: "{rem}/{lim} llamadas", metaRefreshing: "Actualizando...", metaNextMin: "Siguiente en {min}m", metaNextSoon: "Siguiente: pronto" },
+                nl: { loading: "Laden...", days: "DAGEN", hours: "UUR", mins: "MIN", secs: "SEC", upcoming: "Aankomende Lancering", statusReady: "Klaar voor Lancering", statusTbd: "Nog te bepalen", statusSuccess: "Lancering Succesvol", statusTbc: "Nog te bevestigen", statusInFlight: "In de Vlucht", statusUnknown: "Onbekende Status", statusHold: "In de wacht", statusPending: "In afwachting", statusPostponed: "Uitgesteld", statusSuspended: "Geschorst", statusCancelled: "Geannuleerd", noneScheduled: "Geen Lancering Gepland", checkLater: "Kijk later nog eens", errorLoad: "Fout bij laden van gegevens", errorTry: "Probeer het later opnieuw", errorRateLimit: "Limiet overschreden. We proberen het later opnieuw.", attribution: "Gegevens via The Space Devs", weather: "Weer", holdReason: "Reden voor wacht: ", failReason: "Reden voor mislukking: ", weatherConcern: "Weerwaarschuwing: ", metaUpdatedLessMin: "Bijgewerkt <1m geleden", metaUpdatedMin: "Bijgewerkt {min}m geleden", metaCalls: "{rem}/{lim} aanroepen", metaRefreshing: "Vernieuwen...", metaNextMin: "Volgende in {min}m", metaNextSoon: "Volgende: snel" }
             };
 
             var t = i18n[langCode] || i18n['en'];
@@ -123,6 +124,45 @@
             }
 
             var targetDate;
+            var lastFetchTime = null;
+            var currentThrottle = null;
+            var metaInfoEl = document.getElementById('space-meta-info');
+
+            function updateMetaInfo() {
+                if (!metaInfoEl) return;
+                var now = new Date().getTime();
+                var statusParts = [];
+                if (lastFetchTime) {
+                    var diffMs = now - lastFetchTime;
+                    var diffMins = Math.floor(diffMs / 60000);
+                    if (diffMins < 1) {
+                        statusParts.push(t.metaUpdatedLessMin);
+                    } else {
+                        statusParts.push(t.metaUpdatedMin.replace('{min}', diffMins));
+                    }
+                }
+                if (currentThrottle) {
+                    var limit = currentThrottle.your_request_limit || 15;
+                    var currentUse = currentThrottle.current_use || 0;
+                    var remaining = limit - currentUse;
+                    if (remaining < 0) {
+                        remaining = 0;
+                    }
+                    statusParts.push(t.metaCalls.replace('{rem}', remaining).replace('{lim}', limit));
+                }
+                if (window.spaceWidgetFetching) {
+                    statusParts.push(t.metaRefreshing);
+                } else if (window.spaceWidgetNextRefreshTime) {
+                    var nextDiffMs = window.spaceWidgetNextRefreshTime - now;
+                    if (nextDiffMs <= 0) {
+                        statusParts.push(t.metaNextSoon);
+                    } else {
+                        var nextDiffMins = Math.ceil(nextDiffMs / 60000);
+                        statusParts.push(t.metaNextMin.replace('{min}', nextDiffMins));
+                    }
+                }
+                metaInfoEl.textContent = statusParts.join(' • ');
+            }
 
             /* Clear any active timers/timeouts from prior script runs on the page */
             if (window.spaceWidgetTimerInterval) {
@@ -131,6 +171,10 @@
             if (window.spaceWidgetFetchTimeout) {
                 clearTimeout(window.spaceWidgetFetchTimeout);
             }
+            if (window.spaceWidgetMetaInterval) {
+                clearInterval(window.spaceWidgetMetaInterval);
+            }
+            window.spaceWidgetMetaInterval = setInterval(updateMetaInfo, 10000);
 
             /* Returns interval in ms based on launch proximity */
             /* Returns interval in ms based on launch proximity and API throttle data */
@@ -253,6 +297,7 @@
                     return;
                 }
                 window.spaceWidgetFetching = true;
+                updateMetaInfo();
 
                 if (window.spaceWidgetTimerInterval) {
                     clearInterval(window.spaceWidgetTimerInterval);
@@ -269,6 +314,7 @@
                     .then(function(throttleData) {
                         var cache = readCache();
                         var throttleObj = throttleData;
+                        currentThrottle = throttleObj;
                         
                         if (cache) {
                             cache.throttle = throttleObj;
@@ -297,8 +343,10 @@
                                 }, 5000);
                             }
                             var retryDelay = (throttleObj.next_use_secs > 0) ? (throttleObj.next_use_secs + 5) * 1000 : 300000;
+                            window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
                             window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
                             window.spaceWidgetFetching = false;
+                            updateMetaInfo();
                             return;
                         }
                         
@@ -322,16 +370,21 @@
                     } )
                     .then(function(data) {
                         writeCache(data, throttleObj);
+                        lastFetchTime = new Date().getTime();
+                        currentThrottle = throttleObj;
+
                         var matchedLaunch = renderData(data);
                         
                         var cache = readCache();
                         var interval = getDynamicTTL(matchedLaunch, cache ? cache.throttle : throttleObj);
+                        window.spaceWidgetNextRefreshTime = new Date().getTime() + interval;
                         
                         if (window.spaceWidgetFetchTimeout) {
                             clearTimeout(window.spaceWidgetFetchTimeout);
                         }
                         window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, interval);
                         window.spaceWidgetFetching = false;
+                        updateMetaInfo();
                     } )
                     .catch(function(e) {
                         var retryDelay = 30000;
@@ -348,8 +401,10 @@
                         var cachedObj = readCache();
                         if (cachedObj && cachedObj.data) {
                             renderData(cachedObj.data);
+                            window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
                             window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
                             window.spaceWidgetFetching = false;
+                            updateMetaInfo();
                             return;
                         }
                         
@@ -365,8 +420,10 @@
                             refreshBtnEl.style.display = 'none';
                         }
                         warningBoxEl.style.display = 'none';
+                        window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
                         window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
                         window.spaceWidgetFetching = false;
+                        updateMetaInfo();
                     } );
             }
 
@@ -587,6 +644,9 @@
             /* Cache-first initialization: render from cache if within TTL, then fetch */
             var initCache = readCache();
             if (initCache && initCache.data) {
+                lastFetchTime = initCache.ts;
+                currentThrottle = initCache.throttle;
+
                 var matchedLaunch = renderData(initCache.data);
                 var now = new Date().getTime();
                 var age = now - (initCache.ts || 0);
@@ -603,13 +663,16 @@
                 }
                 
                 if (age >= ttl || !hasFuture) {
+                    window.spaceWidgetNextRefreshTime = now;
                     fetchLaunch();
                 } else {
                     var remaining = ttl - age;
+                    window.spaceWidgetNextRefreshTime = now + (remaining > 1000 ? remaining : 1000);
                     if (window.spaceWidgetFetchTimeout) {
                         clearTimeout(window.spaceWidgetFetchTimeout);
                     }
                     window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, remaining > 1000 ? remaining : 1000);
+                    updateMetaInfo();
                 }
             } else {
                 fetchLaunch();
