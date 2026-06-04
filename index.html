@@ -60,6 +60,20 @@
                     <label for="days-select"><strong>Days Ahead:</strong></label>
                     <input type="number" id="days-select" min="1" max="365" value="7" onchange="updateWidget()" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 1rem; margin-left: 0.5rem; width: 80px;">
                 </div>
+                <div>
+                    <label for="bg-select"><strong>Background:</strong></label>
+                    <select id="bg-select" onchange="toggleBgInput(); updateWidget();" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 1rem; margin-left: 0.5rem;">
+                        <option value="default">Default Dark</option>
+                        <option value="transparent">Transparent</option>
+                        <option value="custom">Custom Color</option>
+                    </select>
+                    <input type="color" id="bg-color" value="#0f111a" oninput="updateWidget()" style="display: none; width: 40px; height: 36px; padding: 0; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; vertical-align: middle; margin-left: 0.5rem;">
+                </div>
+                <div>
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 0.25rem; height: 36px;">
+                        <input type="checkbox" id="hide-attr-cb" onchange="updateWidget()" style="width: 16px; height: 16px; margin: 0;"> <strong>Hide Attribution</strong>
+                    </label>
+                </div>
                 <div style="text-align: left; width: 350px;">
                     <label><strong>Rockets to Track:</strong></label>
                     <div style="margin-top: 0.5rem; background: white; padding: 1rem; border-radius: 4px; border: 1px solid #cbd5e1; max-height: 200px; overflow-y: auto; font-size: 0.9rem;">
@@ -98,13 +112,18 @@
             <div style="font-size: 0.8rem; color: #64748b; max-width: 500px;">
                 Check the rockets you want to track. If no rockets are selected, <strong>all</strong> upcoming launches will be tracked.
             </div>
-            <div>
-                <button onclick="copyCode()" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Copy Embed Code</button>
-            </div>
         </div>
-        <div style="margin-top: 1.5rem; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto;">
-            <p style="font-size: 0.85rem; color: #475569; text-align: left; margin-bottom: 0.5rem;"><strong>Generated Code:</strong></p>
-            <textarea id="code-output" readonly style="width: 100%; height: 100px; padding: 0.75rem; font-family: monospace; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; color: #334155; resize: vertical; box-sizing: border-box;"></textarea>
+        <div style="margin-top: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; text-align: left;">
+            <div>
+                <p style="font-size: 0.85rem; color: #475569; margin-bottom: 0.5rem;"><strong>Option A: HTML Embed Code (For Forums/Blogs)</strong></p>
+                <textarea id="code-output" readonly style="width: 100%; height: 80px; padding: 0.75rem; font-family: monospace; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; color: #334155; resize: vertical; box-sizing: border-box;"></textarea>
+                <button onclick="copyCode()" style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">Copy Embed HTML</button>
+            </div>
+            <div>
+                <p style="font-size: 0.85rem; color: #475569; margin-bottom: 0.5rem;"><strong>Option B: URL (For Home Assistant / Iframes)</strong></p>
+                <textarea id="url-output" readonly style="width: 100%; height: 80px; padding: 0.75rem; font-family: monospace; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; color: #334155; resize: vertical; box-sizing: border-box;"></textarea>
+                <button onclick="copyUrl()" style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">Copy Embed URL</button>
+            </div>
         </div>
     </div>
 
@@ -129,12 +148,26 @@
                  .replace(/'/g, "&#039;");
         }
 
+        function toggleBgInput() {
+            var bgSelect = document.getElementById('bg-select').value;
+            var bgColorInput = document.getElementById('bg-color');
+            if (bgSelect === 'custom') {
+                bgColorInput.style.display = 'inline-block';
+            } else {
+                bgColorInput.style.display = 'none';
+            }
+        }
+
         function updateWidget() {
             var lang = document.getElementById('lang-select').value;
             
             var daysVal = parseInt(document.getElementById('days-select').value, 10);
             if (isNaN(daysVal) || daysVal < 1) daysVal = 7;
             if (daysVal > 365) daysVal = 365;
+
+            var bgOption = document.getElementById('bg-select').value;
+            var bgColor = document.getElementById('bg-color').value;
+            var hideAttr = document.getElementById('hide-attr-cb').checked;
 
             var rocketInputs = document.getElementsByClassName('rocket-cb');
             var selectedRockets = [];
@@ -144,6 +177,26 @@
                 }
             }
             var rockets = selectedRockets.join(', ');
+
+            // Calculate Iframe/Home Assistant URL
+            var baseUrl = window.location.origin + window.location.pathname.replace('index.html', '').replace(/\/$/, '') + '/embed.html';
+            var queryParams = [];
+            if (lang !== 'en') queryParams.push('lang=' + encodeURIComponent(lang));
+            if (daysVal !== 7) queryParams.push('days=' + encodeURIComponent(daysVal));
+            if (selectedRockets.length > 0) queryParams.push('rockets=' + encodeURIComponent(selectedRockets.join(',')));
+            if (bgOption === 'transparent') {
+                queryParams.push('bg=transparent');
+            } else if (bgOption === 'custom') {
+                queryParams.push('bg=' + encodeURIComponent(bgColor));
+            }
+            if (hideAttr) {
+                queryParams.push('hide_attr=true');
+            }
+            var finalUrl = baseUrl;
+            if (queryParams.length > 0) {
+                finalUrl += '?' + queryParams.join('&');
+            }
+            document.getElementById('url-output').value = finalUrl;
 
             var widgetContainer = document.getElementById('widget-container');
             
@@ -167,6 +220,24 @@
                     var parser = new DOMParser();
                     var doc = parser.parseFromString(html, 'text/html');
                     
+                    // Apply visual styling to the preview widget based on config options
+                    var widget = doc.querySelector('#space-countdown-widget');
+                    if (widget) {
+                        if (bgOption === 'transparent') {
+                            widget.style.background = 'transparent';
+                            widget.style.border = 'none';
+                            widget.style.boxShadow = 'none';
+                        } else if (bgOption === 'custom') {
+                            widget.style.background = bgColor;
+                        }
+                        if (hideAttr) {
+                            var attr = doc.getElementById('space-attribution');
+                            if (attr) {
+                                attr.style.display = 'none';
+                            }
+                        }
+                    }
+
                     widgetContainer.replaceChildren();
                     while (doc.body.firstChild) {
                         widgetContainer.appendChild(doc.body.firstChild);
@@ -188,9 +259,18 @@
                 codeText = document.getElementById('widget-container').innerHTML;
             }
             navigator.clipboard.writeText(codeText).then(function() {
-                showToast('Widget embed code copied to clipboard!', '#3b82f6');
+                showToast('Widget embed HTML copied to clipboard!', '#3b82f6');
             }).catch(function(err) {
                 showToast('Failed to copy text: ' + err, '#ef4444');
+            });
+        }
+
+        function copyUrl() {
+            var urlText = document.getElementById('url-output').value;
+            navigator.clipboard.writeText(urlText).then(function() {
+                showToast('Widget embed URL copied to clipboard!', '#10b981');
+            }).catch(function(err) {
+                showToast('Failed to copy URL: ' + err, '#ef4444');
             });
         }
         
@@ -215,35 +295,8 @@
         }
 
         // initialize
-        var defaultRockets = ["starship", "falcon heavy", "sls", "vulcan", "new glenn", "ariane 6", "angara a5", "proton", "long march 5"];
-        var lang = document.getElementById('lang-select').value;
-        var daysVal = parseInt(document.getElementById('days-select').value, 10);
-        
-        var rocketInputs = document.getElementsByClassName('rocket-cb');
-        var selectedRockets = [];
-        for (var j = 0; j < rocketInputs.length; j++) {
-            if (rocketInputs[j].checked) {
-                selectedRockets.push(rocketInputs[j].value);
-            }
-        }
-        
-        var isDefaultRockets = selectedRockets.length === defaultRockets.length;
-        if (isDefaultRockets) {
-            for (var i = 0; i < selectedRockets.length; i++) {
-                if (defaultRockets.indexOf(selectedRockets[i]) === -1) {
-                    isDefaultRockets = false;
-                    break;
-                }
-            }
-        }
-        
-        // Initialize the textarea code view from the static widget
-        document.getElementById('code-output').value = document.getElementById('widget-container').innerHTML;
-        
-        // Only run updateWidget on load if form controls deviate from default values (e.g. browser autofill/restore)
-        if (lang !== 'en' || daysVal !== 7 || !isDefaultRockets) {
-            updateWidget();
-        }
+        toggleBgInput();
+        updateWidget();
     </script>
 </body>
 
