@@ -1,13 +1,52 @@
 import os
+import re
+
+def validate_script(script, i):
+    # 1. Check for single-line comments // (excluding http:// and https://)
+    if re.search(r'(?<!https:)(?<!http:)\/\/', script):
+        raise ValueError(
+            "Error: Found single-line JS comment '//' in script tag. "
+            "This will break minification onto a single line! Please use '/* ... */' instead."
+        )
+    
+    # 2. Check for mismatched curly braces
+    open_braces = script.count('{')
+    close_braces = script.count('}')
+    if open_braces != close_braces:
+        raise ValueError(
+            f"Error: Mismatched curly braces in JavaScript block #{i} "
+            f"({open_braces} open, {close_braces} close)."
+        )
+    
+    # 3. Check for mismatched parentheses
+    open_parens = script.count('(')
+    close_parens = script.count(')')
+    if open_parens != close_parens:
+        raise ValueError(
+            f"Error: Mismatched parentheses in JavaScript block #{i} "
+            f"({open_parens} open, {close_parens} close)."
+        )
+
+def minify_code(source_code):
+    # Syntax and comment validation checks on Javascript blocks
+    scripts = re.findall(r'<script\b[^>]*>(.*?)</script\b[^>]*>', source_code, flags=re.DOTALL | re.IGNORECASE)
+    for i, script in enumerate(scripts, 1):
+        validate_script(script, i)
+
+    # Strip block comments /* ... */ to save bytes in the minified version
+    minified_src = re.sub(r'/\*.*?\*/', '', source_code, flags=re.DOTALL)
+
+    # Minify the code
+    # Split by lines, strip leading/trailing spaces, and join into a single string
+    lines = minified_src.split('\n')
+    return ''.join([line.strip() for line in lines])
+
 def build():
     # Read the clean, readable source file
     with open('src/widget.html', 'r', encoding='utf-8') as f:
         source_code = f.read()
 
-    # Minify the code
-    # Split by lines, strip leading/trailing spaces, and join into a single string
-    lines = source_code.split('\n')
-    minified = ''.join([line.strip() for line in lines])
+    minified = minify_code(source_code)
 
     # Ensure dist folder exists
     os.makedirs('dist', exist_ok=True)

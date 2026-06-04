@@ -51,6 +51,10 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Run Test Suite
+        if: env.UPDATE_FOUND == 'true'
+        run: python3 -m unittest discover -s tests
+
       - name: Build the widget
         if: env.UPDATE_FOUND == 'true'
         run: python3 build.py

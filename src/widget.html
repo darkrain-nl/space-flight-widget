@@ -6,7 +6,12 @@
                 <div id="space-title" style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem; font-weight: 600;">Loading...</div>
                 <a id="space-name" href="#" target="_blank" rel="noopener noreferrer" style="font-weight: 700; font-size: 1.25rem; margin-bottom: 0.4rem; line-height: 1.3; background: linear-gradient(to right, #fff, #a5b4fc); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none;">--</a>
                 <div id="space-provider-pad" style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px; display: none;">--</div>
-                <div id="space-status" style="display: none; font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">--</div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div id="space-status" style="display: none; font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">--</div>
+                    <button id="space-refresh-btn" title="Refresh" style="display: none; background: none; border: none; padding: 4px; cursor: pointer; color: #64748b; outline: none; border-radius: 4px; transition: color 0.2s, background-color 0.2s; align-items: center; justify-content: center; height: 24px; width: 24px; box-sizing: border-box;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.6s ease-in-out;"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    </button>
+                </div>
             </div>
         </div>
         <div id="space-timer" style="display: none; gap: 8px; flex-shrink: 1; margin: 0 auto; align-items: stretch;">
@@ -30,6 +35,7 @@
                 <span id="space-lbl-s" style="font-size: 0.6rem; color: #94a3b8; letter-spacing: 0.5px;">SECS</span>
             </div>
         </div>
+        <div id="space-coarse-date" style="display: none; font-size: 1.1rem; font-weight: 700; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 0.75rem 1.25rem; border-radius: 8px; color: #a5b4fc; text-align: center; letter-spacing: 0.5px; margin: 0 auto;">--</div>
     </div>
 
     <div id="space-warning-box" style="display: none; font-size: 0.7rem; color: #f87171; margin-top: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 12px; border-radius: 8px; text-align: left; width: 100%; box-sizing: border-box;"></div>
@@ -79,6 +85,8 @@
             var sEl = document.getElementById('space-s');
             var signEl = document.getElementById('space-sign');
             var signBoxEl = document.getElementById('space-sign-box');
+            var refreshBtnEl = document.getElementById('space-refresh-btn');
+            var coarseDateEl = document.getElementById('space-coarse-date');
             
             var lblDEl = document.getElementById('space-lbl-d');
             var lblHEl = document.getElementById('space-lbl-h');
@@ -92,6 +100,27 @@
             lblMEl.textContent = t.mins;
             lblSEl.textContent = t.secs;
             attrLinkEl.textContent = t.attribution;
+
+            if (refreshBtnEl) {
+                refreshBtnEl.onmouseover = function() {
+                    this.style.color = '#a5b4fc';
+                    this.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                } ;
+                refreshBtnEl.onmouseout = function() {
+                    this.style.color = '#64748b';
+                    this.style.backgroundColor = 'transparent';
+                } ;
+                refreshBtnEl.onclick = function() {
+                    var svg = refreshBtnEl.querySelector('svg');
+                    if (svg) {
+                        svg.style.transform = 'rotate(360deg)';
+                        setTimeout(function() {
+                            svg.style.transform = 'none';
+                        }, 600);
+                    }
+                    fetchLaunch(true);
+                } ;
+            }
 
             var targetDate;
 
@@ -182,13 +211,44 @@
                     var cacheObj = {
                         data: data,
                         ts: new Date().getTime(),
-                        throttle: (throttle !== undefined) ? throttle : (existing ? existing.throttle : null)
+                        throttle: (throttle !== undefined && throttle !== null) ? throttle : (existing ? existing.throttle : null)
                     };
                     localStorage.setItem(CACHE_KEY, JSON.stringify(cacheObj) );
                 } catch (e) {}
             }
 
-            function fetchLaunch() {
+            function formatCoarseDate(netStr, precisionId) {
+                var date = new Date(netStr);
+                var year = date.getUTCFullYear();
+                var monthNames = {
+                    en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    fr: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'],
+                    it: ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
+                    de: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+                    es: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                    nl: ['Jan', 'Feb', 'Mrt', 'Apr', 'Mei', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec']
+                };
+                var months = monthNames[langCode] || monthNames['en'];
+                var monthIndex = date.getUTCMonth();
+                
+                if (precisionId === 7) {
+                    return months[monthIndex] + ' ' + year;
+                }
+                if (precisionId === 8) {
+                    return 'Decade of ' + year;
+                }
+                if (precisionId === 9 || precisionId === 10 || precisionId === 11) {
+                    var quarter = Math.floor(monthIndex / 3) + 1;
+                    return 'Q' + quarter + ' ' + year;
+                }
+                if (precisionId === 12 || precisionId === 15) {
+                    var half = monthIndex < 6 ? 'H1' : 'H2';
+                    return half + ' ' + year;
+                }
+                return String(year);
+            }
+
+            function fetchLaunch(force) {
                 if (window.spaceWidgetFetching) {
                     return;
                 }
@@ -223,6 +283,18 @@
                         if (currentUse >= limit) {
                             if (cache && cache.data) {
                                 renderData(cache.data);
+                            }
+                            if (force) {
+                                warningBoxEl.textContent = t.errorRateLimit;
+                                warningBoxEl.style.display = 'block';
+                                setTimeout(function() {
+                                    var existing = readCache();
+                                    if (existing && existing.data) {
+                                        renderData(existing.data);
+                                    } else {
+                                        warningBoxEl.style.display = 'none';
+                                    }
+                                }, 5000);
                             }
                             var retryDelay = (throttleObj.next_use_secs > 0) ? (throttleObj.next_use_secs + 5) * 1000 : 300000;
                             window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
@@ -287,7 +359,11 @@
                         providerPadEl.style.display = 'none';
                         avatarEl.style.display = 'none';
                         timerEl.style.display = 'none';
+                        coarseDateEl.style.display = 'none';
                         statusEl.style.display = 'none';
+                        if (refreshBtnEl) {
+                            refreshBtnEl.style.display = 'none';
+                        }
                         warningBoxEl.style.display = 'none';
                         window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
                         window.spaceWidgetFetching = false;
@@ -301,18 +377,30 @@
                     for (var i = 0; i < data.results.length; i++) {
                         var l = data.results[i];
                         var r = '';
-                        var f = '';
+                        var families = [];
                         if (l.rocket && l.rocket.configuration) {
                             r = (l.rocket.configuration.name || '').toLowerCase();
-                            f = (l.rocket.configuration.family || '').toLowerCase();
+                            if (l.rocket.configuration.families) {
+                                for (var k = 0; k < l.rocket.configuration.families.length; k++) {
+                                    families.push((l.rocket.configuration.families[k].name || '').toLowerCase());
+                                }
+                            }
                         }
 
                         var isAllowed = ALLOWED_ROCKETS.length === 0;
                         for (var j = 0; j < ALLOWED_ROCKETS.length; j++) {
-                            if (r.indexOf(ALLOWED_ROCKETS[j]) !== -1 || f.indexOf(ALLOWED_ROCKETS[j]) !== -1) {
+                            var allowed = ALLOWED_ROCKETS[j];
+                            if (r.indexOf(allowed) !== -1) {
                                 isAllowed = true;
                                 break;
                             }
+                            for (var k = 0; k < families.length; k++) {
+                                if (families[k].indexOf(allowed) !== -1) {
+                                    isAllowed = true;
+                                    break;
+                                }
+                            }
+                            if (isAllowed) break;
                         }
 
                         var launchTime = new Date(l.net).getTime();
@@ -405,13 +493,10 @@
 
                     var warningText = '';
                     var lang = langCode || 'en';
-                    var holdLabel = i18n[lang].holdReason || i18n['en'].holdReason || 'Hold Reason: ';
                     var failLabel = i18n[lang].failReason || i18n['en'].failReason || 'Failure Reason: ';
                     var weatherLabel = i18n[lang].weatherConcern || i18n['en'].weatherConcern || 'Weather Concern: ';
 
-                    if (launch.holdreason) {
-                        warningText = holdLabel + launch.holdreason;
-                    } else if (launch.failreason) {
+                    if (launch.failreason) {
                         warningText = failLabel + launch.failreason;
                     } else if (launch.weather_concerns) {
                         warningText = weatherLabel + launch.weather_concerns;
@@ -424,15 +509,31 @@
                         warningBoxEl.style.display = 'none';
                     }
 
-                    targetDate = new Date(launch.net).getTime();
-                    timerEl.style.display = 'flex';
-                    statusEl.style.display = 'inline-block';
+                    var precisionId = (launch.net_precision && launch.net_precision.id) || 5;
+                    var isPrecise = (precisionId <= 6);
 
-                    updateTimer();
-                    if (window.spaceWidgetTimerInterval) {
-                        clearInterval(window.spaceWidgetTimerInterval);
+                    statusEl.style.display = 'inline-block';
+                    if (refreshBtnEl) {
+                        refreshBtnEl.style.display = 'inline-flex';
                     }
-                    window.spaceWidgetTimerInterval = setInterval(updateTimer, 1000);
+
+                    if (isPrecise) {
+                        timerEl.style.display = 'flex';
+                        coarseDateEl.style.display = 'none';
+                        targetDate = new Date(launch.net).getTime();
+                        updateTimer();
+                        if (window.spaceWidgetTimerInterval) {
+                            clearInterval(window.spaceWidgetTimerInterval);
+                        }
+                        window.spaceWidgetTimerInterval = setInterval(updateTimer, 1000);
+                    } else {
+                        timerEl.style.display = 'none';
+                        coarseDateEl.style.display = 'block';
+                        coarseDateEl.textContent = formatCoarseDate(launch.net, precisionId);
+                        if (window.spaceWidgetTimerInterval) {
+                            clearInterval(window.spaceWidgetTimerInterval);
+                        }
+                    }
                 } else {
                     titleEl.textContent = t.noneScheduled;
                     nameEl.textContent = t.checkLater;
@@ -440,7 +541,11 @@
                     providerPadEl.style.display = 'none';
                     avatarEl.style.display = 'none';
                     timerEl.style.display = 'none';
+                    coarseDateEl.style.display = 'none';
                     statusEl.style.display = 'none';
+                    if (refreshBtnEl) {
+                        refreshBtnEl.style.display = 'none';
+                    }
                     warningBoxEl.style.display = 'none';
                 }
 
