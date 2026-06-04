@@ -1,4 +1,4 @@
-<div id="space-countdown-widget" data-lang="en" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.5rem; color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
+<div id="space-countdown-widget" data-lang="en" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
     <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
         <div style="display: flex; align-items: center; gap: 1.5rem; flex: 1; min-width: 250px;">
             <img id="space-avatar" src="" style="display: none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); flex-shrink: 0;" alt="Rocket Thumbnail">
@@ -9,26 +9,26 @@
                 <div id="space-status" style="display: none; font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">--</div>
             </div>
         </div>
-        <div id="space-timer" style="display: none; gap: 12px; flex-shrink: 0; margin: 0 auto; align-items: stretch;">
-            <div id="space-sign-box" style="display: flex; align-items: center; justify-content: center; background: rgba(165, 180, 252, 0.05); border: 1px solid rgba(165, 180, 252, 0.15); padding: 0.5rem; border-radius: 8px; min-width: 45px; box-sizing: border-box;">
-                <span id="space-sign" style="font-size: 1.75rem; font-weight: 800; color: #a5b4fc; line-height: 1;">T-</span>
+        <div id="space-timer" style="display: none; gap: 8px; flex-shrink: 1; margin: 0 auto; align-items: stretch;">
+            <div id="space-sign-box" style="display: flex; align-items: center; justify-content: center; background: rgba(165, 180, 252, 0.05); border: 1px solid rgba(165, 180, 252, 0.15); padding: 0.5rem 0.25rem; border-radius: 8px; min-width: 36px; max-width: 48px; flex: 1; box-sizing: border-box;">
+                <span id="space-sign" style="font-size: 1.35rem; font-weight: 800; color: #a5b4fc; line-height: 1;">T-</span>
             </div>
-            <div style="display: flex; flex-direction: column; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5rem; border-radius: 8px; min-width: 50px;">
-            <span id="space-d" style="font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 4px;">00</span>
-            <span id="space-lbl-d" style="font-size: 0.65rem; color: #94a3b8; letter-spacing: 0.5px;">DAYS</span>
-        </div>
-        <div style="display: flex; flex-direction: column; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5rem; border-radius: 8px; min-width: 50px;">
-            <span id="space-h" style="font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 4px;">00</span>
-            <span id="space-lbl-h" style="font-size: 0.65rem; color: #94a3b8; letter-spacing: 0.5px;">HOURS</span>
-        </div>
-        <div style="display: flex; flex-direction: column; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5rem; border-radius: 8px; min-width: 50px;">
-            <span id="space-m" style="font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 4px;">00</span>
-            <span id="space-lbl-m" style="font-size: 0.65rem; color: #94a3b8; letter-spacing: 0.5px;">MINS</span>
-        </div>
-        <div style="display: flex; flex-direction: column; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5rem; border-radius: 8px; min-width: 50px;">
-            <span id="space-s" style="font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 4px;">00</span>
-            <span id="space-lbl-s" style="font-size: 0.65rem; color: #94a3b8; letter-spacing: 0.5px;">SECS</span>
-        </div>
+            <div style="display: flex; flex-direction: column; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5rem 0.25rem; border-radius: 8px; min-width: 44px; max-width: 58px; flex: 1; box-sizing: border-box;">
+                <span id="space-d" style="font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 4px;">00</span>
+                <span id="space-lbl-d" style="font-size: 0.6rem; color: #94a3b8; letter-spacing: 0.5px;">DAYS</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5rem 0.25rem; border-radius: 8px; min-width: 44px; max-width: 58px; flex: 1; box-sizing: border-box;">
+                <span id="space-h" style="font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 4px;">00</span>
+                <span id="space-lbl-h" style="font-size: 0.6rem; color: #94a3b8; letter-spacing: 0.5px;">HOURS</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5rem 0.25rem; border-radius: 8px; min-width: 44px; max-width: 58px; flex: 1; box-sizing: border-box;">
+                <span id="space-m" style="font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 4px;">00</span>
+                <span id="space-lbl-m" style="font-size: 0.6rem; color: #94a3b8; letter-spacing: 0.5px;">MINS</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 0.5rem 0.25rem; border-radius: 8px; min-width: 44px; max-width: 58px; flex: 1; box-sizing: border-box;">
+                <span id="space-s" style="font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 4px;">00</span>
+                <span id="space-lbl-s" style="font-size: 0.6rem; color: #94a3b8; letter-spacing: 0.5px;">SECS</span>
+            </div>
         </div>
     </div>
 
