@@ -11,7 +11,9 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background: transparent;
+            background: transparent !important;
+            background-color: transparent !important;
+            color-scheme: normal;
             font-family: 'Inter', system-ui, sans-serif;
             overflow: hidden;
             display: flex;
@@ -156,6 +158,7 @@
                         if (safeBg) {
                             if (safeBg === 'transparent') {
                                 widget.style.background = 'transparent';
+                                widget.style.backgroundColor = 'transparent';
                                 widget.style.border = 'none';
                                 widget.style.boxShadow = 'none';
                             } else {
