@@ -20,7 +20,7 @@ Embed upcoming heavy-lift rocket launches directly into your forum or website. A
 
 
 ## ✨ Features
-- **Multi-Language Support**: Fully translated interface and launch statuses in English (`en`), French (`fr`), Italian (`it`), German (`de`), Spanish (`es`), and Dutch (`nl`). English is the default.
+- **Multi-Language Support**: Fully translated interface and launch statuses in English (`en`), French (`fr`), Italian (`it`), German (`de`), Spanish (`es`), and Dutch (`nl`) (dynamic API-provided metadata like hold reasons and pad locations remains in English). English is the default.
 - **BBCode Compatible**: Built entirely with inline styles and ES5 Javascript to bypass strict forum sanitizers and `[html]` tags.
 - **Detailed Launch Metadata**: Displays launch status badges (e.g. *Go for Launch*, *TBD*, *Successful*, *On Hold*, *Postponed*, *Cancelled*), launch service provider, launch pad location, and weather launch probability (%).
 - **Hold & Failure Alerts**: Dynamic warning alerts integrated directly into the widget to show critical launch updates like **Hold Reason**, **Failure Reason**, and **Weather Concerns** based on API updates.
