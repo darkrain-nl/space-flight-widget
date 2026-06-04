@@ -86,5 +86,30 @@ class TestBuildMinifier(unittest.TestCase):
             minify_code(sample_code)
         self.assertIn("Mismatched parentheses", str(ctx.exception))
 
+    def test_smiley_bug_sequences_throw(self):
+        # Test }) throws
+        sample_code1 = """
+        <script>
+            (function() {
+                var x = 5;
+            })();
+        </script>
+        """
+        with self.assertRaises(ValueError) as ctx1:
+            minify_code(sample_code1)
+        self.assertIn("smiley-triggering sequence '})'", str(ctx1.exception))
+
+        # Test 8) throws
+        sample_code2 = """
+        <script>
+            if (precisionId === 8) {
+                return 'Decade';
+            }
+        </script>
+        """
+        with self.assertRaises(ValueError) as ctx2:
+            minify_code(sample_code2)
+        self.assertIn("smiley-triggering sequence '8)'", str(ctx2.exception))
+
 if __name__ == '__main__':
     unittest.main()
