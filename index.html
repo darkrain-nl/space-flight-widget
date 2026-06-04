@@ -35,6 +35,49 @@
             font-size: 1rem;
             margin-left: 0.5rem;
         }
+
+        /* Light Theme Overrides */
+        #space-countdown-widget.light-theme {
+            color: #1e293b !important;
+        }
+        #space-countdown-widget.light-theme #space-name {
+            background: none !important;
+            -webkit-text-fill-color: #0f172a !important;
+            color: #0f172a !important;
+        }
+        #space-countdown-widget.light-theme #space-title {
+            color: #475569 !important;
+        }
+        #space-countdown-widget.light-theme #space-provider-pad {
+            color: #475569 !important;
+        }
+        #space-countdown-widget.light-theme #space-timer > div {
+            background: rgba(0, 0, 0, 0.05) !important;
+            color: #0f172a !important;
+        }
+        #space-countdown-widget.light-theme #space-lbl-d,
+        #space-countdown-widget.light-theme #space-lbl-h,
+        #space-countdown-widget.light-theme #space-lbl-m,
+        #space-countdown-widget.light-theme #space-lbl-s {
+            color: #475569 !important;
+        }
+        #space-countdown-widget.light-theme #space-sign-box {
+            background: rgba(79, 70, 229, 0.05) !important;
+            border-color: rgba(79, 70, 229, 0.15) !important;
+        }
+        #space-countdown-widget.light-theme #space-sign {
+            color: #4f46e5 !important;
+        }
+        #space-countdown-widget.light-theme #space-refresh-btn {
+            color: #475569 !important;
+        }
+        #space-countdown-widget.light-theme #space-meta-info,
+        #space-countdown-widget.light-theme #space-attr-link {
+            color: #475569 !important;
+        }
+        #space-countdown-widget.light-theme #space-attribution {
+            border-top-color: rgba(0, 0, 0, 0.1) !important;
+        }
     </style>
 </head>
 
@@ -68,6 +111,13 @@
                         <option value="custom">Custom Color</option>
                     </select>
                     <input type="color" id="bg-color" value="#0f111a" oninput="updateWidget()" style="display: none; width: 40px; height: 36px; padding: 0; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; vertical-align: middle; margin-left: 0.5rem;">
+                </div>
+                <div>
+                    <label for="theme-select"><strong>Text Theme:</strong></label>
+                    <select id="theme-select" onchange="updateWidget()" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 1rem; margin-left: 0.5rem;">
+                        <option value="dark">Light Text (Dark Theme)</option>
+                        <option value="light">Dark Text (Light Theme)</option>
+                    </select>
                 </div>
                 <div>
                     <label style="cursor: pointer; display: flex; align-items: center; gap: 0.25rem; height: 36px;">
@@ -168,6 +218,7 @@
             var bgOption = document.getElementById('bg-select').value;
             var bgColor = document.getElementById('bg-color').value;
             var hideAttr = document.getElementById('hide-attr-cb').checked;
+            var theme = document.getElementById('theme-select').value;
 
             var rocketInputs = document.getElementsByClassName('rocket-cb');
             var selectedRockets = [];
@@ -191,6 +242,9 @@
             }
             if (hideAttr) {
                 queryParams.push('hide_attr=true');
+            }
+            if (theme === 'light') {
+                queryParams.push('theme=light');
             }
             var finalUrl = baseUrl;
             if (queryParams.length > 0) {
@@ -235,6 +289,9 @@
                             if (attr) {
                                 attr.style.display = 'none';
                             }
+                        }
+                        if (theme === 'light') {
+                            widget.classList.add('light-theme');
                         }
                     }
 
