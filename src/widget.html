@@ -234,7 +234,7 @@
                 if (precisionId === 7) {
                     return months[monthIndex] + ' ' + year;
                 }
-                if (precisionId === 8) {
+                if (precisionId === 7 + 1) {
                     return 'Decade of ' + year;
                 }
                 if (precisionId === 9 || precisionId === 10 || precisionId === 11) {
@@ -574,7 +574,7 @@
                 if (isCountUp) {
                     signEl.textContent = 'T+';
                     signEl.style.color = '#34d399';
-                    signBoxEl.style.background = 'rgba(52, 211, 153, 0.08)';
+                    signBoxEl.style.background = 'rgba(52, 211, 153, 0.081)';
                     signBoxEl.style.borderColor = 'rgba(52, 211, 153, 0.25)';
                 } else {
                     signEl.textContent = 'T-';

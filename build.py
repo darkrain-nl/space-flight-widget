@@ -27,6 +27,19 @@ def validate_script(script, i):
             f"({open_parens} open, {close_parens} close)."
         )
 
+    # 4. Check for smiley bug sequences
+    if '})' in script:
+        raise ValueError(
+            f"Error: Found smiley-triggering sequence '}})' in JavaScript block #{i}. "
+            "This will break in some forum BBCode parsers. Please write '} )' with a space instead."
+        )
+    if '8)' in script:
+        raise ValueError(
+            f"Error: Found smiley-triggering sequence '8)' in JavaScript block #{i}. "
+            "This will break in some forum BBCode parsers (converting to cool glasses emoji). "
+            "Please write '8 )' or '7 + 1' instead."
+        )
+
 def minify_code(source_code):
     # Syntax and comment validation checks on Javascript blocks
     scripts = re.findall(r'<script\b[^>]*>(.*?)</script\b[^>]*>', source_code, flags=re.DOTALL | re.IGNORECASE)
