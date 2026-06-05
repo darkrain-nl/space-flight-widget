@@ -230,6 +230,43 @@ class TestWidgetQualityAndConstraints(unittest.TestCase):
                 f"Found smiley trigger '8)' in dist/widget.min.html script block #{i}!",
             )
 
+    def test_widget_version_consistency(self):
+        """Verify that the widget's HTML data-version attribute matches the JS WIDGET_VERSION constant, and conforms to Semantic Versioning."""
+        source_code = self.read_file_content("src/widget.html")
+
+        # 1. Extract data-version from HTML root div
+        html_version_match = re.search(
+            r'\bdata-version=["\']([^"\']+)["\']', source_code
+        )
+        self.assertIsNotNone(
+            html_version_match,
+            "Could not find 'data-version' attribute in src/widget.html root div",
+        )
+        html_version = html_version_match.group(1)
+
+        # 2. Extract WIDGET_VERSION from JS
+        js_version_match = re.search(
+            r'\bWIDGET_VERSION\s*=\s*["\']([^"\']+)["\']', source_code
+        )
+        self.assertIsNotNone(
+            js_version_match,
+            "Could not find 'WIDGET_VERSION' variable definition in src/widget.html script tag",
+        )
+        js_version = js_version_match.group(1)
+
+        # 3. Assert matching and correct SemVer format
+        self.assertEqual(
+            html_version,
+            js_version,
+            f"Version mismatch! HTML data-version is '{html_version}', but JS WIDGET_VERSION is '{js_version}'.",
+        )
+
+        semver_pattern = r"^\d+\.\d+\.\d+$"
+        self.assertTrue(
+            re.match(semver_pattern, html_version),
+            f"Version '{html_version}' does not conform to Semantic Versioning (X.Y.Z).",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
