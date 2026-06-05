@@ -5,6 +5,16 @@ All notable changes to the Space Flight Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-06-05
+
+### Added
+- **Clickable Version Link**: Wrapped the version metadata string in a hyperlink pointing to the widget's official preview site (`https://darkrain-nl.github.io/space-flight-widget/`) so users can easily find and configure it. Added hover transition styles to match the theme.
+
+### Fixed
+- **Multi-Instance and Re-injection Rendering**: Scoped all DOM query selectors within the parent widget container (`widgetEl`) of the executing script to prevent ID collisions when multiple widgets are embedded on the same page or when the widget is dynamically re-injected in the preview page.
+- **Local Fetching State**: Moved the `isFetching` state variable from the global `window` object to a local script closure scope to prevent one widget's pending request from blocking another instance's fetches.
+- **Metadata Output Formatting**: Improved metadata text concatenation to prevent trailing bullet bugs when status parts are empty.
+
 ## [1.0.1] - 2026-06-05
 
 ### Fixed
