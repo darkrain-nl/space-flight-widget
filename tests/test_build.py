@@ -3,8 +3,9 @@ import sys
 import os
 
 # Add parent directory to path so we can import build
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from build import minify_code
+
 
 class TestBuildMinifier(unittest.TestCase):
     def test_successful_minification(self):
@@ -57,7 +58,9 @@ class TestBuildMinifier(unittest.TestCase):
         try:
             minify_code(sample_code)
         except ValueError:
-            self.fail("minify_code() raised ValueError unexpectedly with HTTP/HTTPS URLs!")
+            self.fail(
+                "minify_code() raised ValueError unexpectedly with HTTP/HTTPS URLs!"
+            )
 
     def test_mismatched_curly_braces_throws(self):
         sample_code = """
@@ -111,5 +114,6 @@ class TestBuildMinifier(unittest.TestCase):
             minify_code(sample_code2)
         self.assertIn("smiley-triggering sequence '8)'", str(ctx2.exception))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
