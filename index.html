@@ -78,6 +78,46 @@
         #space-countdown-widget.light-theme #space-attribution {
             border-top-color: rgba(0, 0, 0, 0.1) !important;
         }
+
+        .text-btn {
+            background: none;
+            border: none;
+            color: #3b82f6;
+            cursor: pointer;
+            padding: 0;
+            font-weight: 600;
+            font-size: 0.8rem;
+            font-family: inherit;
+            transition: color 0.2s;
+        }
+        .text-btn:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+        .reset-btn {
+            padding: 0.5rem 1.25rem;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease-in-out;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .reset-btn:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+            border-color: #94a3b8;
+        }
+        .reset-btn:active {
+            background: #cbd5e1;
+        }
     </style>
 </head>
 
@@ -128,8 +168,15 @@
                     </label>
                 </div>
                 <div style="text-align: left; width: 350px;">
-                    <label><strong>Rockets to Track:</strong></label>
-                    <div style="margin-top: 0.5rem; background: white; padding: 1rem; border-radius: 4px; border: 1px solid #cbd5e1; max-height: 200px; overflow-y: auto; font-size: 0.9rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                        <label><strong>Rockets to Track:</strong></label>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <button type="button" onclick="selectAllRockets(true)" class="text-btn">Select All</button>
+                            <span style="color: #94a3b8; font-size: 0.8rem;">|</span>
+                            <button type="button" onclick="selectAllRockets(false)" class="text-btn">Select None</button>
+                        </div>
+                    </div>
+                    <div style="background: white; padding: 1rem; border-radius: 4px; border: 1px solid #cbd5e1; max-height: 200px; overflow-y: auto; font-size: 0.9rem;">
                         <div style="font-weight: bold; margin-bottom: 0.25rem; color: #475569;">SpaceX</div>
                         <label style="display: block; margin-bottom: 0.25rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="starship" onchange="updateWidget()" checked> Starship</label>
                         <label style="display: block; margin-bottom: 0.25rem; cursor: pointer;"><input type="checkbox" class="rocket-cb" value="falcon heavy" onchange="updateWidget()" checked> Falcon Heavy</label>
@@ -162,8 +209,17 @@
                     </div>
                 </div>
             </div>
-            <div style="font-size: 0.8rem; color: #64748b; max-width: 500px;">
+            <div id="rocket-info-text" style="font-size: 0.8rem; color: #64748b; max-width: 500px; min-height: 1.2rem;">
                 Check the rockets you want to track. If no rockets are selected, <strong>all</strong> upcoming launches will be tracked.
+            </div>
+            <div style="margin-top: 0.25rem;">
+                <button type="button" onclick="resetSettings()" class="reset-btn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                        <path d="M3 3v5h5"></path>
+                    </svg>
+                    Reset All Settings
+                </button>
             </div>
         </div>
         <div style="margin-top: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; text-align: left;">
@@ -211,6 +267,32 @@
             }
         }
 
+        function selectAllRockets(checked) {
+            var rocketInputs = document.getElementsByClassName('rocket-cb');
+            for (var j = 0; j < rocketInputs.length; j++) {
+                rocketInputs[j].checked = checked;
+            }
+            updateWidget();
+        }
+
+        function resetSettings() {
+            document.getElementById('lang-select').value = 'en';
+            document.getElementById('days-select').value = '7';
+            document.getElementById('bg-select').value = 'default';
+            document.getElementById('bg-color').value = '#0f111a';
+            document.getElementById('theme-select').value = 'dark';
+            document.getElementById('hide-attr-cb').checked = false;
+            
+            var defaultChecked = ['starship', 'falcon heavy', 'sls', 'vulcan', 'new glenn', 'ariane 6', 'angara a5', 'proton', 'long march 5'];
+            var rocketInputs = document.getElementsByClassName('rocket-cb');
+            for (var j = 0; j < rocketInputs.length; j++) {
+                rocketInputs[j].checked = defaultChecked.indexOf(rocketInputs[j].value) !== -1;
+            }
+            
+            toggleBgInput();
+            updateWidget();
+        }
+
         function updateWidget() {
             var lang = document.getElementById('lang-select').value;
             
@@ -231,6 +313,17 @@
                 }
             }
             var rockets = selectedRockets.join(', ');
+
+            var infoTextEl = document.getElementById('rocket-info-text');
+            if (infoTextEl) {
+                if (selectedRockets.length === 0) {
+                    infoTextEl.innerHTML = '💡 <strong>No filtering (Track All):</strong> Since no rockets are selected, the widget will track <strong>all</strong> upcoming launches.';
+                } else if (selectedRockets.length === rocketInputs.length) {
+                    infoTextEl.innerHTML = '💡 <strong>Strict filtering (Track Listed):</strong> The widget will <strong>only</strong> track launches matching these ' + rocketInputs.length + ' specific rockets.';
+                } else {
+                    infoTextEl.innerHTML = '💡 <strong>Custom filtering:</strong> The widget will track <strong>only</strong> the <strong>' + selectedRockets.length + '</strong> selected rocket' + (selectedRockets.length > 1 ? 's' : '') + '.';
+                }
+            }
 
             // Calculate Iframe/Home Assistant URL
             var baseUrl = window.location.origin + window.location.pathname.replace('index.html', '').replace(/\/$/, '') + '/embed.html';
