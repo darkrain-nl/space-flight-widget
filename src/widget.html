@@ -1,4 +1,4 @@
-<div id="space-countdown-widget" data-lang="en" data-version="1.0.1" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
+<div id="space-countdown-widget" data-lang="en" data-version="1.0.2" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
     <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
         <div style="display: flex; align-items: center; gap: 1.5rem; flex: 1; min-width: 250px;">
             <img id="space-avatar" src="" style="display: none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); flex-shrink: 0;" alt="Rocket Thumbnail">
@@ -51,13 +51,26 @@
             var API_URL = API_BASE + '/launches/upcoming/?limit=50';
             var THROTTLE_URL = API_BASE + '/api-throttle/';
             var CACHE_KEY = 'space_launch_cache';
-            var widgetEl = document.getElementById('space-countdown-widget');
-            var langCode = (widgetEl.getAttribute('data-lang') || 'en').toLowerCase();
-            var dataRockets = widgetEl.getAttribute('data-rockets');
+            var scripts = document.getElementsByTagName('script');
+            var currentScript = scripts[scripts.length - 1];
+            var widgetEl = null;
+            if (currentScript && currentScript.parentNode) {
+                var p = currentScript.parentNode;
+                if (p.id === 'space-countdown-widget') {
+                    widgetEl = p;
+                } else {
+                    widgetEl = p.querySelector ? p.querySelector('#space-countdown-widget') : null;
+                }
+            }
+            if (!widgetEl) {
+                widgetEl = document.getElementById('space-countdown-widget');
+            }
+            var langCode = (widgetEl ? widgetEl.getAttribute('data-lang') || 'en' : 'en').toLowerCase();
+            var dataRockets = widgetEl ? widgetEl.getAttribute('data-rockets') : null;
             var ALLOWED_ROCKETS = dataRockets !== null 
                 ? dataRockets.split(',').map(function(r) { return r.trim().toLowerCase(); } ).filter(function(r) { return r.length > 0; } ) 
                 : ['starship', 'super heavy', 'falcon heavy', 'sls', 'vulcan', 'new glenn', 'ariane 6', 'long march 5', 'angara a5', 'proton'];
-            var dataDays = widgetEl.getAttribute('data-days');
+            var dataDays = widgetEl ? widgetEl.getAttribute('data-days') : null;
             var MAX_DAYS = (dataDays !== null && !isNaN(parseInt(dataDays, 10)) && parseInt(dataDays, 10) > 0)
                 ? parseInt(dataDays, 10)
                 : 7;
@@ -73,27 +86,34 @@
 
             var t = i18n[langCode] || i18n['en'];
 
-            var titleEl = document.getElementById('space-title');
-            var nameEl = document.getElementById('space-name');
-            var providerPadEl = document.getElementById('space-provider-pad');
-            var avatarEl = document.getElementById('space-avatar');
-            var statusEl = document.getElementById('space-status');
-            var warningBoxEl = document.getElementById('space-warning-box');
-            var timerEl = document.getElementById('space-timer');
-            var dEl = document.getElementById('space-d');
-            var hEl = document.getElementById('space-h');
-            var mEl = document.getElementById('space-m');
-            var sEl = document.getElementById('space-s');
-            var signEl = document.getElementById('space-sign');
-            var signBoxEl = document.getElementById('space-sign-box');
-            var refreshBtnEl = document.getElementById('space-refresh-btn');
-            var coarseDateEl = document.getElementById('space-coarse-date');
+            function getWidgetEl(id) {
+                if (widgetEl && widgetEl.querySelector) {
+                    return widgetEl.querySelector('#' + id);
+                }
+                return document.getElementById(id);
+            }
+
+            var titleEl = getWidgetEl('space-title');
+            var nameEl = getWidgetEl('space-name');
+            var providerPadEl = getWidgetEl('space-provider-pad');
+            var avatarEl = getWidgetEl('space-avatar');
+            var statusEl = getWidgetEl('space-status');
+            var warningBoxEl = getWidgetEl('space-warning-box');
+            var timerEl = getWidgetEl('space-timer');
+            var dEl = getWidgetEl('space-d');
+            var hEl = getWidgetEl('space-h');
+            var mEl = getWidgetEl('space-m');
+            var sEl = getWidgetEl('space-s');
+            var signEl = getWidgetEl('space-sign');
+            var signBoxEl = getWidgetEl('space-sign-box');
+            var refreshBtnEl = getWidgetEl('space-refresh-btn');
+            var coarseDateEl = getWidgetEl('space-coarse-date');
             
-            var lblDEl = document.getElementById('space-lbl-d');
-            var lblHEl = document.getElementById('space-lbl-h');
-            var lblMEl = document.getElementById('space-lbl-m');
-            var lblSEl = document.getElementById('space-lbl-s');
-            var attrLinkEl = document.getElementById('space-attr-link');
+            var lblDEl = getWidgetEl('space-lbl-d');
+            var lblHEl = getWidgetEl('space-lbl-h');
+            var lblMEl = getWidgetEl('space-lbl-m');
+            var lblSEl = getWidgetEl('space-lbl-s');
+            var attrLinkEl = getWidgetEl('space-attr-link');
 
             titleEl.textContent = t.loading;
             lblDEl.textContent = t.days;
@@ -126,11 +146,12 @@
                 } ;
             }
 
-            var WIDGET_VERSION = '1.0.1';
+            var WIDGET_VERSION = '1.0.2';
             var targetDate;
+            var isFetching = false;
             window.spaceWidgetLastFetchTime = window.spaceWidgetLastFetchTime || null;
             window.spaceWidgetCurrentThrottle = window.spaceWidgetCurrentThrottle || null;
-            var metaInfoEl = document.getElementById('space-meta-info');
+            var metaInfoEl = getWidgetEl('space-meta-info');
 
             function updateMetaInfo() {
                 if (!metaInfoEl) return;
@@ -150,7 +171,7 @@
                     var currentUse = window.spaceWidgetCurrentThrottle.current_use || 0;
                     statusParts.push(t.metaCalls.replace('{use}', currentUse).replace('{lim}', limit));
                 }
-                if (window.spaceWidgetFetching) {
+                if (isFetching) {
                     statusParts.push(t.metaRefreshing);
                 } else if (window.spaceWidgetNextRefreshTime) {
                     var nextDiffMs = window.spaceWidgetNextRefreshTime - now;
@@ -161,7 +182,8 @@
                         statusParts.push(t.metaNextMin.replace('{min}', nextDiffMins));
                     }
                 }
-                metaInfoEl.textContent = 'v' + WIDGET_VERSION + ' • ' + statusParts.join(' • ');
+                var statusText = statusParts.join(' • ');
+                metaInfoEl.textContent = 'v' + WIDGET_VERSION + (statusText ? ' • ' + statusText : '');
             }
 
             /* Clear any active timers/timeouts from prior script runs on the page */
@@ -293,10 +315,10 @@
             }
 
             function fetchLaunch(force) {
-                if (window.spaceWidgetFetching) {
+                if (isFetching) {
                     return;
                 }
-                window.spaceWidgetFetching = true;
+                isFetching = true;
                 updateMetaInfo();
 
                 if (window.spaceWidgetTimerInterval) {
@@ -345,7 +367,7 @@
                             var retryDelay = (throttleObj.next_use_secs > 0) ? (throttleObj.next_use_secs + 5) * 1000 : 300000;
                             window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
                             window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
-                            window.spaceWidgetFetching = false;
+                            isFetching = false;
                             updateMetaInfo();
                             return;
                         }
@@ -383,7 +405,7 @@
                             clearTimeout(window.spaceWidgetFetchTimeout);
                         }
                         window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, interval);
-                        window.spaceWidgetFetching = false;
+                        isFetching = false;
                         updateMetaInfo();
                     } )
                     .catch(function(e) {
@@ -403,7 +425,7 @@
                             renderData(cachedObj.data);
                             window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
                             window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
-                            window.spaceWidgetFetching = false;
+                            isFetching = false;
                             updateMetaInfo();
                             return;
                         }
@@ -422,7 +444,7 @@
                         warningBoxEl.style.display = 'none';
                         window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
                         window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
-                        window.spaceWidgetFetching = false;
+                        isFetching = false;
                         updateMetaInfo();
                     } );
             }
