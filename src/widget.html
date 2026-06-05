@@ -1,4 +1,4 @@
-<div id="space-countdown-widget" data-lang="en" data-version="1.0.0" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
+<div id="space-countdown-widget" data-lang="en" data-version="1.0.1" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
     <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
         <div style="display: flex; align-items: center; gap: 1.5rem; flex: 1; min-width: 250px;">
             <img id="space-avatar" src="" style="display: none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); flex-shrink: 0;" alt="Rocket Thumbnail">
@@ -126,7 +126,7 @@
                 } ;
             }
 
-            var WIDGET_VERSION = '1.0.0';
+            var WIDGET_VERSION = '1.0.1';
             var targetDate;
             window.spaceWidgetLastFetchTime = window.spaceWidgetLastFetchTime || null;
             window.spaceWidgetCurrentThrottle = window.spaceWidgetCurrentThrottle || null;
@@ -417,7 +417,7 @@
                         coarseDateEl.style.display = 'none';
                         statusEl.style.display = 'none';
                         if (refreshBtnEl) {
-                            refreshBtnEl.style.display = 'none';
+                            refreshBtnEl.style.display = 'inline-flex';
                         }
                         warningBoxEl.style.display = 'none';
                         window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
@@ -601,7 +601,7 @@
                     coarseDateEl.style.display = 'none';
                     statusEl.style.display = 'none';
                     if (refreshBtnEl) {
-                        refreshBtnEl.style.display = 'none';
+                        refreshBtnEl.style.display = 'inline-flex';
                     }
                     warningBoxEl.style.display = 'none';
                 }
