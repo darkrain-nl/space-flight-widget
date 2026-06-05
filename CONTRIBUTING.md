@@ -10,8 +10,21 @@ Thank you for your interest in contributing! This widget is designed to be highl
    ```bash
    python3 build.py
    ```
-4. **Preview**: Open `index.html` in your browser to verify your changes look good.
-5. **Commit**: Commit your changes and open a Pull Request.
+4. **Python Linting & Formatting**: We use Ruff (via `uv`) to lint and format all Python code (like tests and the build script). Make sure to check and format your code before committing:
+   ```bash
+   # Check for lint errors
+   uvx ruff check .
+   # Verify code formatting
+   uvx ruff format --check .
+   ```
+   You can automatically fix lint issues and format code with:
+   ```bash
+   uvx ruff check --fix .
+   uvx ruff format .
+   ```
+5. **Preview**: Open `index.html` in your browser to verify your changes look good.
+6. **Commit**: Commit your changes and open a Pull Request.
+
 
 ## Critical Technical Constraints
 
