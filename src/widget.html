@@ -127,16 +127,16 @@
             }
 
             var targetDate;
-            var lastFetchTime = null;
-            var currentThrottle = null;
+            window.spaceWidgetLastFetchTime = window.spaceWidgetLastFetchTime || null;
+            window.spaceWidgetCurrentThrottle = window.spaceWidgetCurrentThrottle || null;
             var metaInfoEl = document.getElementById('space-meta-info');
 
             function updateMetaInfo() {
                 if (!metaInfoEl) return;
                 var now = new Date().getTime();
                 var statusParts = [];
-                if (lastFetchTime) {
-                    var diffMs = now - lastFetchTime;
+                if (window.spaceWidgetLastFetchTime) {
+                    var diffMs = now - window.spaceWidgetLastFetchTime;
                     var diffMins = Math.floor(diffMs / 60000);
                     if (diffMins < 1) {
                         statusParts.push(t.metaUpdatedLessMin);
@@ -144,9 +144,9 @@
                         statusParts.push(t.metaUpdatedMin.replace('{min}', diffMins));
                     }
                 }
-                if (currentThrottle) {
-                    var limit = currentThrottle.your_request_limit || 15;
-                    var currentUse = currentThrottle.current_use || 0;
+                if (window.spaceWidgetCurrentThrottle) {
+                    var limit = window.spaceWidgetCurrentThrottle.your_request_limit || 15;
+                    var currentUse = window.spaceWidgetCurrentThrottle.current_use || 0;
                     statusParts.push(t.metaCalls.replace('{use}', currentUse).replace('{lim}', limit));
                 }
                 if (window.spaceWidgetFetching) {
@@ -313,7 +313,7 @@
                     .then(function(throttleData) {
                         var cache = readCache();
                         var throttleObj = throttleData;
-                        currentThrottle = throttleObj;
+                        window.spaceWidgetCurrentThrottle = throttleObj;
                         
                         if (cache) {
                             cache.throttle = throttleObj;
@@ -369,8 +369,8 @@
                     } )
                     .then(function(data) {
                         writeCache(data, throttleObj);
-                        lastFetchTime = new Date().getTime();
-                        currentThrottle = throttleObj;
+                        window.spaceWidgetLastFetchTime = new Date().getTime();
+                        window.spaceWidgetCurrentThrottle = throttleObj;
 
                         var matchedLaunch = renderData(data);
                         
@@ -643,8 +643,8 @@
             /* Cache-first initialization: render from cache if within TTL, then fetch */
             var initCache = readCache();
             if (initCache && initCache.data) {
-                lastFetchTime = initCache.ts;
-                currentThrottle = initCache.throttle;
+                window.spaceWidgetLastFetchTime = initCache.ts;
+                window.spaceWidgetCurrentThrottle = initCache.throttle;
 
                 var matchedLaunch = renderData(initCache.data);
                 var now = new Date().getTime();
