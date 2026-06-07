@@ -83,7 +83,7 @@
             var dataRockets = widgetEl ? widgetEl.getAttribute('data-rockets') : null;
             var ALLOWED_ROCKETS = dataRockets !== null 
                 ? dataRockets.split(',').map(function(r) { return r.trim().toLowerCase(); } ).filter(function(r) { return r.length > 0; } ) 
-                : ['starship', 'super heavy', 'falcon heavy', 'sls', 'vulcan', 'new glenn', 'ariane 6', 'long march 5', 'angara a5', 'proton'];
+                : [];
             var dataDays = widgetEl ? widgetEl.getAttribute('data-days') : null;
             var MAX_DAYS = (dataDays !== null && !isNaN(parseInt(dataDays, 10)) && parseInt(dataDays, 10) > 0)
                 ? parseInt(dataDays, 10)
