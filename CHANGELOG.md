@@ -5,6 +5,13 @@ All notable changes to the Space Flight Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-06-07
+
+### Fixed
+- **Infinite Fetch Loop API Spam**: Cooled down API fetches when a launch has passed by returning a 5-minute cache TTL.
+- **T+ Count-up Display Filter**: Prevented recently launched or in-flight missions from being immediately filtered out, ensuring T+ count-up and simulation modes work properly.
+- **Orphaned Safety Timeout**: Cleared active safety timeouts on script initialization to prevent background memory leaks.
+
 ## [1.0.5] - 2026-06-07
 
 ### Added
