@@ -436,6 +436,19 @@
                         if (currentUse >= limit) {
                             if (cache && cache.data) {
                                 renderData(cache.data);
+                            } else {
+                                titleEl.textContent = t.errorLoad;
+                                nameEl.textContent = t.errorRateLimit;
+                                nameEl.removeAttribute('href');
+                                providerPadEl.style.display = 'none';
+                                avatarEl.style.display = 'none';
+                                timerEl.style.display = 'none';
+                                coarseDateEl.style.display = 'none';
+                                statusEl.style.display = 'none';
+                                if (refreshBtnEl) {
+                                    refreshBtnEl.style.display = 'inline-flex';
+                                }
+                                warningBoxEl.style.display = 'none';
                             }
                             if (force) {
                                 warningBoxEl.textContent = t.errorRateLimit;

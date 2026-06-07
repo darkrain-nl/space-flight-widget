@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Liftoff Celebration (T-0 Animation)**: Added a smooth, pulsing green glow effect on the `T+` sign container when a launch occurs, creating a dynamic visual celebration of liftoff.
 - **Light Theme Adaptation**: Added CSS overrides for the local time element under the light theme in both the index preview and embed environments.
 
+### Fixed
+- **Rate Limit Loading Hang**: Fixed a bug where the widget would hang indefinitely on the `LOADING...` state with no manual refresh button visible if the API rate limit was reached and no cached data was present in local storage.
+
 ## [1.0.3] - 2026-06-07
 
 ### Added
