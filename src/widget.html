@@ -1,9 +1,20 @@
-<div id="space-countdown-widget" data-lang="en" data-version="1.0.2" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
+<div id="space-countdown-widget" data-lang="en" data-version="1.0.3" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
     <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
         <div style="display: flex; align-items: center; gap: 1.5rem; flex: 1; min-width: 250px;">
             <img id="space-avatar" src="" style="display: none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); flex-shrink: 0;" alt="Rocket Thumbnail">
-            <div style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
-                <div id="space-title" style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem; font-weight: 600;">Loading...</div>
+            <div style="display: flex; flex-direction: column; align-items: flex-start; text-align: left; flex: 1; min-width: 0; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; flex-wrap: wrap;">
+                    <div id="space-title" style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Loading...</div>
+                    <div id="space-nav-controls" style="display: none; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.05); padding: 2px 6px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08); vertical-align: middle;">
+                        <button id="space-prev-btn" type="button" title="Previous Launch" style="background: none; border: none; padding: 2px; cursor: pointer; color: #94a3b8; outline: none; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; height: 16px; width: 16px; box-sizing: border-box; transition: color 0.2s, background-color 0.2s;">
+                            <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </button>
+                        <span id="space-nav-index" style="font-size: 0.65rem; color: #94a3b8; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1;">1/3</span>
+                        <button id="space-next-btn" type="button" title="Next Launch" style="background: none; border: none; padding: 2px; cursor: pointer; color: #94a3b8; outline: none; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; height: 16px; width: 16px; box-sizing: border-box; transition: color 0.2s, background-color 0.2s;">
+                            <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+                    </div>
+                </div>
                 <a id="space-name" href="#" target="_blank" rel="noopener noreferrer" style="font-weight: 700; font-size: 1.25rem; margin-bottom: 0.4rem; line-height: 1.3; background: linear-gradient(to right, #fff, #a5b4fc); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none;">--</a>
                 <div id="space-provider-pad" style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px; display: none;">--</div>
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -111,6 +122,10 @@
             var signBoxEl = getWidgetEl('space-sign-box');
             var refreshBtnEl = getWidgetEl('space-refresh-btn');
             var coarseDateEl = getWidgetEl('space-coarse-date');
+            var navControlsEl = getWidgetEl('space-nav-controls');
+            var prevBtnEl = getWidgetEl('space-prev-btn');
+            var nextBtnEl = getWidgetEl('space-next-btn');
+            var navIndexEl = getWidgetEl('space-nav-index');
             
             var lblDEl = getWidgetEl('space-lbl-d');
             var lblHEl = getWidgetEl('space-lbl-h');
@@ -149,7 +164,10 @@
                 } ;
             }
 
-            var WIDGET_VERSION = '1.0.2';
+            var WIDGET_VERSION = '1.0.3';
+            var SELECTED_LAUNCH_KEY = 'space_selected_launch_id';
+            var matchedLaunches = [];
+            var currentSelectedIndex = 0;
             var targetDate;
             var isFetching = false;
             window.spaceWidgetLastFetchTime = window.spaceWidgetLastFetchTime || null;
@@ -164,6 +182,52 @@
                 } ;
                 versionLinkEl.onmouseout = function() {
                     this.style.color = '#64748b';
+                } ;
+            }
+
+            if (prevBtnEl) {
+                prevBtnEl.onmouseover = function() {
+                    this.style.color = '#fff';
+                    this.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                } ;
+                prevBtnEl.onmouseout = function() {
+                    this.style.color = '#94a3b8';
+                    this.style.backgroundColor = 'transparent';
+                } ;
+                prevBtnEl.onclick = function(e) {
+                    if (e && e.preventDefault) {
+                        e.preventDefault();
+                    }
+                    if (matchedLaunches.length > 1) {
+                        currentSelectedIndex = (currentSelectedIndex - 1 + matchedLaunches.length) % matchedLaunches.length;
+                        try {
+                            localStorage.setItem(SELECTED_LAUNCH_KEY, matchedLaunches[currentSelectedIndex].id);
+                        } catch (ex) {}
+                        showLaunch(currentSelectedIndex);
+                    }
+                } ;
+            }
+
+            if (nextBtnEl) {
+                nextBtnEl.onmouseover = function() {
+                    this.style.color = '#fff';
+                    this.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                } ;
+                nextBtnEl.onmouseout = function() {
+                    this.style.color = '#94a3b8';
+                    this.style.backgroundColor = 'transparent';
+                } ;
+                nextBtnEl.onclick = function(e) {
+                    if (e && e.preventDefault) {
+                        e.preventDefault();
+                    }
+                    if (matchedLaunches.length > 1) {
+                        currentSelectedIndex = (currentSelectedIndex + 1) % matchedLaunches.length;
+                        try {
+                            localStorage.setItem(SELECTED_LAUNCH_KEY, matchedLaunches[currentSelectedIndex].id);
+                        } catch (ex) {}
+                        showLaunch(currentSelectedIndex);
+                    }
                 } ;
             }
 
@@ -469,8 +533,8 @@
             }
 
             function renderData(data) {
-                var launch = null;
                 var now = new Date().getTime();
+                matchedLaunches = [];
                 if (data && data.results && data.results.length !== undefined) {
                     for (var i = 0; i < data.results.length; i++) {
                         var l = data.results[i];
@@ -508,12 +572,42 @@
                         var isSoon = daysAway <= MAX_DAYS;
 
                         if (isAllowed && isFuture && isSoon) {
-                            launch = l;
+                            matchedLaunches.push(l);
+                            if (matchedLaunches.length === 3) {
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                var storedLaunchId = null;
+                try {
+                    storedLaunchId = localStorage.getItem(SELECTED_LAUNCH_KEY);
+                } catch (ex) {}
+
+                currentSelectedIndex = 0;
+                if (storedLaunchId && matchedLaunches.length > 0) {
+                    for (var idx = 0; idx < matchedLaunches.length; idx++) {
+                        if (matchedLaunches[idx].id === storedLaunchId) {
+                            var lTime = new Date(matchedLaunches[idx].net).getTime();
+                            if (lTime > now) {
+                                currentSelectedIndex = idx;
+                            } else {
+                                try {
+                                    localStorage.removeItem(SELECTED_LAUNCH_KEY);
+                                } catch (ex) {}
+                            }
                             break;
                         }
                     }
                 }
 
+                return showLaunch(currentSelectedIndex);
+            }
+
+            function showLaunch(index) {
+                var launch = (matchedLaunches.length > 0) ? matchedLaunches[index] : null;
+                var now = new Date().getTime();
                 if (launch) {
                     titleEl.textContent = t.upcoming;
                     nameEl.textContent = launch.name;
@@ -645,6 +739,20 @@
                         refreshBtnEl.style.display = 'inline-flex';
                     }
                     warningBoxEl.style.display = 'none';
+                    if (window.spaceWidgetTimerInterval) {
+                        clearInterval(window.spaceWidgetTimerInterval);
+                    }
+                }
+
+                if (navControlsEl) {
+                    if (matchedLaunches.length > 1) {
+                        navControlsEl.style.display = 'inline-flex';
+                        if (navIndexEl) {
+                            navIndexEl.textContent = (index + 1) + '/' + matchedLaunches.length;
+                        }
+                    } else {
+                        navControlsEl.style.display = 'none';
+                    }
                 }
 
                 return launch;
