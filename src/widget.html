@@ -1,4 +1,4 @@
-<div id="space-countdown-widget" data-lang="en" data-version="1.0.4" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
+<div id="space-countdown-widget" data-lang="en" data-version="1.0.5" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
     <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
         <div style="display: flex; align-items: center; gap: 1.5rem; flex: 1; min-width: 250px;">
             <img id="space-avatar" src="" style="display: none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); flex-shrink: 0;" alt="Rocket Thumbnail">
@@ -166,7 +166,7 @@
                 } ;
             }
 
-            var WIDGET_VERSION = '1.0.4';
+            var WIDGET_VERSION = '1.0.5';
             var SELECTED_LAUNCH_KEY = 'space_selected_launch_id';
             var matchedLaunches = [];
             var currentSelectedIndex = 0;
@@ -399,6 +399,29 @@
                 return String(year);
             }
 
+            /* Wrapper to add a timeout to fetch calls (fetch has no native timeout) */
+            function fetchWithTimeout(url, options, timeoutMs) {
+                timeoutMs = timeoutMs || 15000;
+                return new Promise(function(resolve, reject) {
+                    var didTimeout = false;
+                    var timer = setTimeout(function() {
+                        didTimeout = true;
+                        reject(new Error('Fetch timed out after ' + timeoutMs + 'ms') );
+                    }, timeoutMs);
+                    fetch(url, options).then(function(res) {
+                        if (!didTimeout) {
+                            clearTimeout(timer);
+                            resolve(res);
+                        }
+                    } ).catch(function(err) {
+                        if (!didTimeout) {
+                            clearTimeout(timer);
+                            reject(err);
+                        }
+                    } );
+                } );
+            }
+
             function fetchLaunch(force) {
                 if (isFetching) {
                     return;
@@ -413,7 +436,21 @@
                     clearTimeout(window.spaceWidgetFetchTimeout);
                 }
 
-                fetch(THROTTLE_URL, { cache: 'no-store' } )
+                /* Safety timeout: force-reset isFetching after 30s to prevent permanent hang */
+                if (window.spaceWidgetFetchSafetyTimeout) {
+                    clearTimeout(window.spaceWidgetFetchSafetyTimeout);
+                }
+                window.spaceWidgetFetchSafetyTimeout = setTimeout(function() {
+                    if (isFetching) {
+                        isFetching = false;
+                        var retryDelay = 60000;
+                        window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
+                        window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
+                        updateMetaInfo();
+                    }
+                }, 30000);
+
+                fetchWithTimeout(THROTTLE_URL, { cache: 'no-store' }, 15000)
                     .then(function(res) {
                         if (!res.ok) throw new Error('Throttle API failed');
                         return res.json();
@@ -466,6 +503,7 @@
                             window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
                             window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
                             isFetching = false;
+                            if (window.spaceWidgetFetchSafetyTimeout) { clearTimeout(window.spaceWidgetFetchSafetyTimeout); }
                             updateMetaInfo();
                             return;
                         }
@@ -478,7 +516,7 @@
             }
 
             function doFetchLaunch(throttleObj) {
-                fetch(API_URL, { cache: 'no-store' } )
+                fetchWithTimeout(API_URL, { cache: 'no-store' }, 15000)
                     .then(function(res) {
                         if (res.status === 429) {
                             return res.json().then(function(errData) {
@@ -504,6 +542,7 @@
                         }
                         window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, interval);
                         isFetching = false;
+                        if (window.spaceWidgetFetchSafetyTimeout) { clearTimeout(window.spaceWidgetFetchSafetyTimeout); }
                         updateMetaInfo();
                     } )
                     .catch(function(e) {
@@ -524,6 +563,7 @@
                             window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
                             window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
                             isFetching = false;
+                            if (window.spaceWidgetFetchSafetyTimeout) { clearTimeout(window.spaceWidgetFetchSafetyTimeout); }
                             updateMetaInfo();
                             return;
                         }
@@ -543,6 +583,7 @@
                         window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
                         window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
                         isFetching = false;
+                        if (window.spaceWidgetFetchSafetyTimeout) { clearTimeout(window.spaceWidgetFetchSafetyTimeout); }
                         updateMetaInfo();
                     } );
             }

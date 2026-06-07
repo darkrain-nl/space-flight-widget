@@ -5,6 +5,18 @@ All notable changes to the Space Flight Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2026-06-07
+
+### Added
+- **Fetch Timeout Protection**: Added a `fetchWithTimeout` wrapper with a 15-second timeout around all API `fetch()` calls to prevent indefinite network hangs. Added a 30-second safety timeout that force-resets the `isFetching` flag as a failsafe.
+- **Simulator Cache Warning**: Added a warning label below the "Simulate Launch Liftoff (T-10s)" checkbox on the preview page explaining that toggling clears the local browser cache.
+
+### Changed
+- **Configuration Panel Layout**: Redesigned the preview page configuration controls into a clean 2×2 grid layout with labels above inputs, structured checkbox section with properly aligned warning text, and a wider `.instructions` container with polished shadow and border-radius.
+
+### Fixed
+- **Fetch Hanging Bug**: Fixed a critical bug where the widget could get permanently stuck in "Refreshing..." state if an API fetch never resolved (e.g., network timeout). The `isFetching` flag was never reset, blocking all future refresh attempts indefinitely.
+
 ## [1.0.4] - 2026-06-07
 
 ### Added
