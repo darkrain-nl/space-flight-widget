@@ -5,6 +5,13 @@ All notable changes to the Space Flight Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-06-07
+
+### Added
+- **Local Time & Date Display**: Convert and display the launch's UTC date and time into the viewer's local browser timezone under the launch pad location.
+- **Liftoff Celebration (T-0 Animation)**: Added a smooth, pulsing green glow effect on the `T+` sign container when a launch occurs, creating a dynamic visual celebration of liftoff.
+- **Light Theme Adaptation**: Added CSS overrides for the local time element under the light theme in both the index preview and embed environments.
+
 ## [1.0.3] - 2026-06-07
 
 ### Added
