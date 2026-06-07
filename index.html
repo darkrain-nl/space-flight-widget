@@ -179,10 +179,11 @@
                         <input type="checkbox" id="hide-attr-cb" onchange="updateWidget()" style="width: 16px; height: 16px; margin: 0;"> <strong>Hide Attribution</strong>
                     </label>
                 </div>
-                <div>
-                    <label style="cursor: pointer; display: flex; align-items: center; gap: 0.25rem; height: 36px;">
+                <div style="margin-bottom: 0.5rem;">
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 0.25rem; height: 36px; margin-bottom: 0px;">
                         <input type="checkbox" id="simulate-past-cb" onchange="updateWidget()" style="width: 16px; height: 16px; margin: 0;"> <strong>Simulate Launch Liftoff (T-10s)</strong>
                     </label>
+                    <span style="font-size: 0.72rem; color: #64748b; display: block; margin-top: -6px; margin-left: 20px;">⚠️ Toggling clears local browser cache to force simulator load.</span>
                 </div>
                 <div style="text-align: left; width: 350px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
@@ -352,9 +353,13 @@
             if (simulateCb) {
                 var currentSimulateState = simulateCb.checked;
                 if (window.lastSimulateState !== currentSimulateState) {
+                    var wasInitial = (window.lastSimulateState === undefined);
                     window.lastSimulateState = currentSimulateState;
                     try {
                         localStorage.removeItem('space_launch_cache');
+                        if (!wasInitial) {
+                            showToast('Simulation state changed: Local preview cache cleared.', '#f59e0b');
+                        }
                     } catch (e) {}
                 }
             }
