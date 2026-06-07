@@ -649,11 +649,13 @@
                             try {
                                 var localDate = new Date(launch.net);
                                 var options = {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: 'numeric',
-                                    minute: '2-digit'
-                                };
+                                     day: 'numeric',
+                                     month: 'short',
+                                     year: 'numeric',
+                                     hour: '2-digit',
+                                     minute: '2-digit',
+                                     timeZoneName: 'short'
+                                 };
                                 localTimeStr = localDate.toLocaleString(langCode, options);
                             } catch (ex) {
                                 localTimeStr = String(launch.net);
