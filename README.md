@@ -9,10 +9,7 @@ Embed upcoming heavy-lift rocket launches directly into your forum or website. A
 ### Previews
 <p align="center">
   <a href="https://darkrain-nl.github.io/space-flight-widget/">
-    <img src="assets/preview.gif?v=4" alt="Active Launch" width="700" />
-  </a>
-  <a href="https://darkrain-nl.github.io/space-flight-widget/">
-    <img src="assets/preview.png" alt="No Launch Fallback" width="350" />
+    <img src="assets/preview.gif?v=1.0.3" alt="Active Launch" width="700" />
   </a>
 </p>
 
