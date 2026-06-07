@@ -1,4 +1,4 @@
-<div id="space-countdown-widget" data-lang="en" data-version="1.0.5" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
+<div id="space-countdown-widget" data-lang="en" data-version="1.0.6" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
     <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
         <div style="display: flex; align-items: center; gap: 1.5rem; flex: 1; min-width: 250px;">
             <img id="space-avatar" src="" style="display: none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); flex-shrink: 0;" alt="Rocket Thumbnail">
@@ -166,7 +166,7 @@
                 } ;
             }
 
-            var WIDGET_VERSION = '1.0.5';
+            var WIDGET_VERSION = '1.0.6';
             var SELECTED_LAUNCH_KEY = 'space_selected_launch_id';
             var matchedLaunches = [];
             var currentSelectedIndex = 0;
@@ -278,6 +278,9 @@
             if (window.spaceWidgetFetchTimeout) {
                 clearTimeout(window.spaceWidgetFetchTimeout);
             }
+            if (window.spaceWidgetFetchSafetyTimeout) {
+                clearTimeout(window.spaceWidgetFetchSafetyTimeout);
+            }
             if (window.spaceWidgetMetaInterval) {
                 clearInterval(window.spaceWidgetMetaInterval);
             }
@@ -303,9 +306,9 @@
                     return (throttle.next_use_secs + 5) * 1000;
                 }
 
-                /* If launch time has passed, cache is stale immediately */
+                /* If launch time has passed, cache is stale immediately, but wait 5 minutes before re-fetching */
                 if (now >= launchTime) {
-                    return 0;
+                    return 300000;
                 }
 
                 var msAway = launchTime - now;
@@ -624,7 +627,7 @@
                         var launchTime = new Date(l.net).getTime();
                         var daysAway = (launchTime - now) / (1000 * 60 * 60 * 24);
 
-                        var isFuture = launchTime > now;
+                        var isFuture = launchTime > now || (now - launchTime) < 15 * 60 * 1000 || (l.status && (l.status.name === 'In Flight' || l.status.name === 'Hold'));
                         var isSoon = daysAway <= MAX_DAYS;
 
                         if (isAllowed && isFuture && isSoon) {
