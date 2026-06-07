@@ -5,6 +5,13 @@ All notable changes to the Space Flight Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-06-07
+
+### Added
+- **Multi-Launch Navigation**: Added Back (`<`) and Forward (`>`) navigation button controls in a slick inline pill next to the countdown title, allowing users to cycle through up to 3 upcoming launches matching their filters.
+- **Selection Persistence**: Implemented browser `localStorage` caching for the selected launch ID. The widget retains the user's manual selection upon page reload until the launch takes place, at which point it automatically falls back to the default upcoming launch.
+- **CSS Light Theme Support**: Added adaptive light theme CSS style overrides for the navigation control container and buttons to match index and embed environments.
+
 ## [1.0.2] - 2026-06-05
 
 ### Added
