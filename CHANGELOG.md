@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Selection Persistence**: Implemented browser `localStorage` caching for the selected launch ID. The widget retains the user's manual selection upon page reload until the launch takes place, at which point it automatically falls back to the default upcoming launch.
 - **CSS Light Theme Support**: Added adaptive light theme CSS style overrides for the navigation control container and buttons to match index and embed environments.
 
+### Changed
+- **Default Rocket Tracking**: Changed the default rocket filter configuration to not select any specific rockets on load. This allows the widget to track all upcoming launches by default if no configuration is provided. Removed default checks on preview page checkboxes.
+
 ## [1.0.2] - 2026-06-05
 
 ### Added
