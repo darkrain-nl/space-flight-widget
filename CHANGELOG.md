@@ -5,6 +5,11 @@ All notable changes to the Space Flight Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.7] - 2026-06-12
+
+### Added
+- **Extended Launch Visibility & Smart Selection**: Extended the visibility of recently completed launches from 15 minutes to 12 hours. Added default selected index fallback logic to show the first upcoming launch on load if the past launch is older than 30 minutes.
+
 ## [1.0.6] - 2026-06-07
 
 ### Fixed
