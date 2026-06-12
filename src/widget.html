@@ -665,7 +665,7 @@
                     for (var idx = 0; idx < matchedLaunches.length; idx++) {
                         if (matchedLaunches[idx].id === storedLaunchId) {
                             var lTime = new Date(matchedLaunches[idx].net).getTime();
-                            if (lTime > now) {
+                            if (lTime > now || (now - lTime) <= 30 * 60 * 1000) {
                                 currentSelectedIndex = idx;
                             } else {
                                 try {

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Extended Launch Visibility & Smart Selection**: Extended the visibility of recently completed launches from 15 minutes to 12 hours. Added default selected index fallback logic to show the first upcoming launch on load if the past launch is older than 30 minutes.
+- **Manual Launch Selection Retention Window**: Retain the user's manual launch selection in `localStorage` on page reload for up to 30 minutes after liftoff, matching the critical window default selection logic.
 
 ## [1.0.6] - 2026-06-07
 
