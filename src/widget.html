@@ -627,7 +627,7 @@
                         var launchTime = new Date(l.net).getTime();
                         var daysAway = (launchTime - now) / (1000 * 60 * 60 * 24);
 
-                        var isFuture = launchTime > now || (now - launchTime) < 15 * 60 * 1000 || (l.status && (l.status.name === 'In Flight' || l.status.name === 'Hold'));
+                        var isFuture = launchTime > now || (now - launchTime) < 12 * 60 * 60 * 1000 || (l.status && (l.status.name === 'In Flight' || l.status.name === 'Hold'));
                         var isSoon = daysAway <= MAX_DAYS;
 
                         if (isAllowed && isFuture && isSoon) {
@@ -644,7 +644,23 @@
                     storedLaunchId = localStorage.getItem(SELECTED_LAUNCH_KEY);
                 } catch (ex) {}
 
-                currentSelectedIndex = 0;
+                var defaultIndex = 0;
+                if (matchedLaunches.length > 0) {
+                    var firstLaunchTime = new Date(matchedLaunches[0].net).getTime();
+                    if (now >= firstLaunchTime) {
+                        var age = now - firstLaunchTime;
+                        if (age > 30 * 60 * 1000) {
+                            for (var i = 0; i < matchedLaunches.length; i++) {
+                                if (new Date(matchedLaunches[i].net).getTime() > now) {
+                                    defaultIndex = i;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                currentSelectedIndex = defaultIndex;
                 if (storedLaunchId && matchedLaunches.length > 0) {
                     for (var idx = 0; idx < matchedLaunches.length; idx++) {
                         if (matchedLaunches[idx].id === storedLaunchId) {
