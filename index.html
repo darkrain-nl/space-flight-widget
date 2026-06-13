@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://thespacedevs-prod.nyc3.digitaloceanspaces.com; script-src 'self' 'unsafe-inline'; connect-src 'self' https://ll.thespacedevs.com; style-src 'self' 'unsafe-inline';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://thespacedevs-prod.nyc3.digitaloceanspaces.com; script-src 'self' 'unsafe-inline'; connect-src 'self' https://ll.thespacedevs.com; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self';">
     <title>Embeddable Widget Preview</title>
     <style>
         /* This is just for the preview page, DO NOT copy this into your embed */
@@ -405,12 +405,37 @@
 
             var infoTextEl = document.getElementById('rocket-info-text');
             if (infoTextEl) {
+                infoTextEl.replaceChildren();
+                infoTextEl.appendChild(document.createTextNode('💡 '));
+                var infoStrong = document.createElement('strong');
                 if (selectedRockets.length === 0) {
-                    infoTextEl.innerHTML = '💡 <strong>No filtering (Track All):</strong> Since no rockets are selected, the widget will track <strong>all</strong> upcoming launches.';
+                    infoStrong.textContent = 'No filtering (Track All):';
+                    infoTextEl.appendChild(infoStrong);
+                    infoTextEl.appendChild(document.createTextNode(' Since no rockets are selected, the widget will track '));
+                    var infoStrong2 = document.createElement('strong');
+                    infoStrong2.textContent = 'all';
+                    infoTextEl.appendChild(infoStrong2);
+                    infoTextEl.appendChild(document.createTextNode(' upcoming launches.'));
                 } else if (selectedRockets.length === rocketInputs.length) {
-                    infoTextEl.innerHTML = '💡 <strong>Strict filtering (Track Listed):</strong> The widget will <strong>only</strong> track launches matching these ' + rocketInputs.length + ' specific rockets.';
+                    infoStrong.textContent = 'Strict filtering (Track Listed):';
+                    infoTextEl.appendChild(infoStrong);
+                    infoTextEl.appendChild(document.createTextNode(' The widget will '));
+                    var infoStrong2 = document.createElement('strong');
+                    infoStrong2.textContent = 'only';
+                    infoTextEl.appendChild(infoStrong2);
+                    infoTextEl.appendChild(document.createTextNode(' track launches matching these ' + rocketInputs.length + ' specific rockets.'));
                 } else {
-                    infoTextEl.innerHTML = '💡 <strong>Custom filtering:</strong> The widget will track <strong>only</strong> the <strong>' + selectedRockets.length + '</strong> selected rocket' + (selectedRockets.length > 1 ? 's' : '') + '.';
+                    infoStrong.textContent = 'Custom filtering:';
+                    infoTextEl.appendChild(infoStrong);
+                    infoTextEl.appendChild(document.createTextNode(' The widget will track '));
+                    var infoStrong2 = document.createElement('strong');
+                    infoStrong2.textContent = 'only';
+                    infoTextEl.appendChild(infoStrong2);
+                    infoTextEl.appendChild(document.createTextNode(' the '));
+                    var infoStrong3 = document.createElement('strong');
+                    infoStrong3.textContent = selectedRockets.length;
+                    infoTextEl.appendChild(infoStrong3);
+                    infoTextEl.appendChild(document.createTextNode(' selected rocket' + (selectedRockets.length > 1 ? 's' : '') + '.'));
                 }
             }
 
@@ -499,7 +524,7 @@
         function copyCode() {
             var codeText = document.getElementById('code-output').value;
             if (!codeText) {
-                codeText = document.getElementById('widget-container').innerHTML;
+                codeText = currentHtml;
             }
             navigator.clipboard.writeText(codeText).then(function() {
                 showToast('Widget embed HTML copied to clipboard!', '#3b82f6');
