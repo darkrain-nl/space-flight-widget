@@ -135,6 +135,14 @@
         .reset-btn:active {
             background: #cbd5e1;
         }
+
+        #widget-container {
+            margin-top: 2rem;
+            margin-bottom: 8rem;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
     </style>
 </head>
 
@@ -324,9 +332,45 @@
                                     }
                                 },
                                 pad: { name: "SLC-40", location: { name: "Cape Canaveral, FL" } }
+                            },
+                            {
+                                id: "mock-launch-id-2",
+                                name: "Starship | Flight 6",
+                                net: new Date(new Date().getTime() + 86400000 * 2).toISOString(), // 2 days in future
+                                net_precision: { id: 5, name: "Second" },
+                                status: { id: 1, name: "Go for Launch" },
+                                probability: 85,
+                                launch_service_provider: { name: "SpaceX" },
+                                rocket: {
+                                    configuration: {
+                                        name: "Starship",
+                                        families: [
+                                            { name: "Starship" }
+                                        ]
+                                    }
+                                },
+                                pad: { name: "Orbital Launch Mount A", location: { name: "Starbase, TX" } }
+                            },
+                            {
+                                id: "mock-launch-id-3",
+                                name: "Vulcan Centaur | Certification-2",
+                                net: new Date(new Date().getTime() + 86400000 * 5).toISOString(), // 5 days in future
+                                net_precision: { id: 5, name: "Second" },
+                                status: { id: 1, name: "Go for Launch" },
+                                probability: 90,
+                                launch_service_provider: { name: "United Launch Alliance" },
+                                rocket: {
+                                    configuration: {
+                                        name: "Vulcan Centaur",
+                                        families: [
+                                            { name: "Vulcan" }
+                                        ]
+                                    }
+                                },
+                                pad: { name: "SLC-41", location: { name: "Cape Canaveral, FL" } }
                             }
                         ]
-                    })));
+                    } ) ) );
                 }
             }
             return originalFetch.apply(this, arguments);
