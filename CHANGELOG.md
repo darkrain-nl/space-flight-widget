@@ -5,6 +5,20 @@ All notable changes to the Space Flight Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.8] - 2026-06-15
+
+### Added
+- **Unified Controls Pill Layout**: Grouped navigation buttons (Previous, Next, and a new Home/Reset button) along with the Refresh button into a single right-aligned, cohesive controls group to stabilize layout and prevent shifting when the title changes.
+- **Home Navigation Action**: Added a target/focus Home button between Previous and Next chevrons to allow quick resetting of the selection to the nearest upcoming/future launch.
+
+### Changed
+- **WCAG Accessibility & Focus Indicator Upgrades**: 
+  - Increased button target sizes from 16px to 24px for improved touch target accessibility (WCAG 2.5.8).
+  - Implemented focus rings on all interactive buttons and links utilizing `onfocus` and `onblur` event mapping (WCAG 2.4.7).
+  - Enhanced contrast of meta-text from #64748b to #94a3b8 in dark theme to satisfy contrast requirements (WCAG 1.4.3).
+  - Applied `aria-label` tags to all button components (WCAG 4.1.2).
+  - Avoided hover underline clipping on the main launch name link by transitioning `border-bottom-color` instead of `text-decoration`.
+
 ## [1.0.7] - 2026-06-12
 
 ### Added
