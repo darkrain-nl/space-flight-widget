@@ -5,6 +5,14 @@ All notable changes to the Space Flight Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.9] - 2026-06-17
+
+### Added
+- **Countdown Hold Behavior**: Automatically freeze the countdown timer when a launch status is "On Hold" (preventing incorrect count-up `T+` display).
+- **On Hold Duration Restriction**: Keep "On Hold" launches in the active list for up to 60 minutes after their scheduled launch time (unless actual flight starts or the launch is scrubbed/postponed).
+- **Fast Dynamic Refresh Rate**: Enforce rapid cache updates (every 2 minutes under healthy API quotas, 5 minutes under conserved/depleted quotas) when a launch is on hold to quickly reflect status changes.
+- **On Hold Theme Feedback**: Custom orange/yellow visual branding applied to the `T-` sign box and symbol during holds.
+
 ## [1.0.8] - 2026-06-15
 
 ### Added
