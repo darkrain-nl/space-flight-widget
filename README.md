@@ -47,6 +47,35 @@ All configuration is done via `data-*` attributes on the widget's root `<div>`:
 <div id="space-countdown-widget" data-lang="en" data-rockets="starship, falcon heavy" data-days="14" ...>
 ```
 
+### ⏱️ Display Behavior & Refresh Intervals
+
+The widget uses smart logic to determine which launch to highlight, how to display its countdown state, and how frequently to fetch data from the API to conserve your request quota.
+
+#### Display States & Visibility
+
+| Launch Status / Precision | Timer Display | Visibility / Fallback Rules | Visual Styling & Behavior |
+| :--- | :--- | :--- | :--- |
+| **Go for Launch / Launch Pending** | `T-` Countdown (ticking) | Visible until NET (scheduled launch time). | Active countdown of days, hours, minutes, and seconds. Badge displays status and weather probability if available. |
+| **In Flight / Launch in Flight** | `T+` Count-up (ticking) | Visible up to **12 hours** after liftoff. | Count-up timer with green `T+` badge that pulses on even seconds. |
+| **On Hold** | `T- 00:00:00:00` (frozen) | Visible up to **60 minutes** past NET (unless resumed or scrubbed). | Frozen at zero. Displays an amber `T-` badge and shows a red warning alert box detailing the `holdReason`. |
+| **Coarse Date** <br>*(TBD, Month, Quarter, Year)* | Static Date Text | Until updated with precise time or past scheduling window. | Hides the ticking timer and shows localized coarse date text (e.g. `"Q3 2026"`, `"Nov 2026"`). |
+| **No upcoming launch** | None | Shown when no launch matches the rocket criteria within the configured time window. | Shows fallback message: `"No Launch Scheduled. Check back later."` |
+
+*Note: If the active launch has passed its scheduled time (NET) by more than **30 minutes**, the widget automatically switches its default focus to the next upcoming future launch (though users can still navigate back to past/ongoing launches using the control buttons).*
+
+#### Dynamic Cache & API Refresh Rates (TTL)
+
+To prevent hitting the API request throttle, the widget caches data in `localStorage` and dynamically shifts its update frequency based on remaining API quota and launch proximity:
+
+| Scenario / API Quota Status | Proximity to Launch | Refresh Interval (TTL) |
+| :--- | :--- | :--- |
+| **Launch is On Hold** | Any time | **2 minutes** *(or **5 minutes** when quota is low)* |
+| **Post-Launch (NET has passed)** | Any time | **5 minutes** |
+| **API Quota Healthy** <br>*(>3 requests remaining)* | `< 5 mins` to NET <br> `< 1 hour` to NET <br> `< 6 hours` to NET <br> `< 24 hours` to NET <br> Default / Fallback | **2 minutes** <br> **5 minutes** <br> **10 minutes** <br> **15 minutes** *(also for coarse launches)* <br> **30 minutes** |
+| **API Quota Low** <br>*(1-3 requests remaining)* | `< 30 mins` to NET <br> `< 2 hours` to NET <br> `< 12 hours` to NET <br> Default / Fallback | **5 minutes** <br> **10 minutes** <br> **20 minutes** <br> **30 minutes** |
+| **API Quota Depleted** <br>*(0 requests remaining)* | Any time | **10 minutes** |
+| **Throttled (HTTP 429)** | Any time | Waits until the throttle period resets (+5 seconds safety margin) |
+
 ## 🤝 How to Contribute
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for important technical rules you need to follow when developing for this widget (like our strict BBCode parsing constraints).
 
