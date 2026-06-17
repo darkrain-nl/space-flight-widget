@@ -1,4 +1,4 @@
-<div id="space-countdown-widget" data-lang="en" data-version="1.0.8" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
+<div id="space-countdown-widget" data-lang="en" data-version="1.0.9" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
     <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
         <div style="display: flex; align-items: center; gap: 1.5rem; flex: 1; min-width: 250px;">
             <img id="space-avatar" src="" style="display: none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); flex-shrink: 0;" alt="Rocket Thumbnail">
@@ -201,12 +201,13 @@
                 } ;
             }
 
-            var WIDGET_VERSION = '1.0.8';
+            var WIDGET_VERSION = '1.0.9';
             var SELECTED_LAUNCH_KEY = 'space_selected_launch_id';
             var matchedLaunches = [];
             var currentSelectedIndex = 0;
             var defaultSelectedIndex = 0;
             var targetDate;
+            var isHold = false;
             var isFetching = false;
             window.spaceWidgetLastFetchTime = window.spaceWidgetLastFetchTime || null;
             window.spaceWidgetCurrentThrottle = window.spaceWidgetCurrentThrottle || null;
@@ -409,6 +410,15 @@
                 /* If we are throttled, wait for next reset */
                 if (throttle && throttle.next_use_secs > 0) {
                     return (throttle.next_use_secs + 5) * 1000;
+                }
+
+                var statusName = (launch.status && launch.status.name) ? launch.status.name.toLowerCase() : '';
+                var isHoldStatus = statusName.indexOf('hold') !== -1;
+                if (isHoldStatus) {
+                    if (remaining > 3) {
+                        return 120000;
+                    }
+                    return 300000;
                 }
 
                 /* If launch time has passed, cache is stale immediately, but wait 5 minutes before re-fetching */
@@ -738,7 +748,11 @@
                         var launchTime = new Date(l.net).getTime();
                         var daysAway = (launchTime - now) / (1000 * 60 * 60 * 24);
 
-                        var isFuture = launchTime > now || (now - launchTime) < 12 * 60 * 60 * 1000 || (l.status && (l.status.name === 'In Flight' || l.status.name === 'Hold'));
+                        var isHoldStatus = l.status && l.status.name === 'Hold';
+                        var isFuture = launchTime > now || (now - launchTime) < 12 * 60 * 60 * 1000 || (l.status && l.status.name === 'In Flight');
+                        if (isHoldStatus) {
+                            isFuture = launchTime > now || (now - launchTime) <= 60 * 60 * 1000;
+                        }
                         var isSoon = daysAway <= MAX_DAYS;
 
                         if (isAllowed && isFuture && isSoon) {
@@ -799,8 +813,9 @@
                     var isPrecise = (precisionId <= 6);
                     var rawStatus = (launch.status && launch.status.name) ? launch.status.name : '';
                     var statusName = rawStatus.toLowerCase();
+                    isHold = statusName.indexOf('hold') !== -1;
                     var launchTime = new Date(launch.net).getTime();
-                    var isRecent = isPrecise && (now >= launchTime) && (statusName.indexOf('hold') === -1);
+                    var isRecent = isPrecise && (now >= launchTime) && !isHold;
                     titleEl.textContent = isRecent ? t.recent : t.upcoming;
 
                     nameEl.textContent = launch.name;
@@ -939,7 +954,9 @@
                         if (window.spaceWidgetTimerInterval) {
                             clearInterval(window.spaceWidgetTimerInterval);
                         }
-                        window.spaceWidgetTimerInterval = setInterval(updateTimer, 1000);
+                        if (!isHold) {
+                            window.spaceWidgetTimerInterval = setInterval(updateTimer, 1000);
+                        }
                     } else {
                         timerEl.style.display = 'none';
                         coarseDateEl.style.display = 'block';
@@ -989,7 +1006,10 @@
             function updateTimer() {
                 var now = new Date().getTime();
                 var dist = targetDate - now;
-                var isCountUp = dist < 0;
+                if (isHold && dist < 0) {
+                    dist = 0;
+                }
+                var isCountUp = !isHold && dist < 0;
                 
                 var absSecs = isCountUp 
                     ? Math.floor(Math.abs(dist) / 1000) 
@@ -1019,9 +1039,15 @@
                     }
                 } else {
                     signEl.textContent = 'T-';
-                    signEl.style.color = '#a5b4fc';
-                    signBoxEl.style.backgroundColor = 'rgba(165, 180, 252, 0.05)';
-                    signBoxEl.style.borderColor = 'rgba(165, 180, 252, 0.15)';
+                    if (isHold) {
+                        signEl.style.color = '#fbbf24';
+                        signBoxEl.style.backgroundColor = 'rgba(245, 158, 11, 0.05)';
+                        signBoxEl.style.borderColor = 'rgba(245, 158, 11, 0.15)';
+                    } else {
+                        signEl.style.color = '#a5b4fc';
+                        signBoxEl.style.backgroundColor = 'rgba(165, 180, 252, 0.05)';
+                        signBoxEl.style.borderColor = 'rgba(165, 180, 252, 0.15)';
+                    }
                     signBoxEl.style.boxShadow = 'none';
                 }
             }
