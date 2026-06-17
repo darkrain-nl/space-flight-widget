@@ -138,10 +138,245 @@
 
         #widget-container {
             margin-top: 2rem;
-            margin-bottom: 8rem;
+            margin-bottom: 2.5rem;
             width: 100%;
             display: flex;
             justify-content: center;
+        }
+
+        .help-container {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            max-width: 900px;
+            width: 95%;
+            box-sizing: border-box;
+            margin-bottom: 6rem;
+            font-family: inherit;
+        }
+
+        .tab-navigation {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0px;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            outline: none;
+        }
+
+        .tab-btn:hover {
+            color: #4f46e5;
+            border-bottom-color: #cbd5e1;
+        }
+
+        .tab-btn.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+            text-align: left;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Help section typography & visual elements */
+        .help-section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .help-section-desc {
+            font-size: 0.9rem;
+            color: #475569;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Step cards for Usage Tab */
+        .usage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .usage-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.25rem;
+            position: relative;
+        }
+
+        .usage-card-num {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(79, 70, 229, 0.1);
+            color: #4f46e5;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .usage-card h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            color: #0f172a;
+            font-size: 0.95rem;
+        }
+
+        .usage-card p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #475569;
+            line-height: 1.4;
+        }
+
+        /* Help Info Table */
+        .help-table-wrapper {
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .help-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        .help-table th {
+            background: #f8fafc;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            color: #334155;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .help-table td {
+            padding: 0.75rem 1rem;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+            line-height: 1.4;
+            vertical-align: middle;
+        }
+
+        .help-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .help-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        /* Badges matching widget styling */
+        .help-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .help-badge-go {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .help-badge-flight {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.3);
+            animation: pulse-green 2s infinite;
+        }
+
+        .help-badge-hold {
+            background: rgba(245, 158, 11, 0.15);
+            color: #d97706;
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .help-badge-coarse {
+            background: rgba(139, 92, 246, 0.15);
+            color: #7c3aed;
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .help-badge-none {
+            background: #f1f5f9;
+            color: #64748b;
+            border-color: #cbd5e1;
+        }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .help-highlight {
+            font-family: monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #0f172a;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .help-alert {
+            background: rgba(79, 70, 229, 0.05);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 0.85rem;
+            color: #475569;
+            line-height: 1.45;
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
         }
     </style>
 </head>
@@ -291,7 +526,207 @@
     <!-- END OF WIDGET                                                     -->
     <!-- ================================================================= -->
 
+    <!-- ================================================================= -->
+    <!-- HELP & REFERENCE SECTION                                          -->
+    <!-- ================================================================= -->
+    <div class="help-container" id="help-section">
+        <h3 class="help-section-title" style="border-bottom: 2px solid #e2e8f0; padding-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; font-weight: 700;">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="color: #4f46e5; margin-top: -1px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            Widget Reference & Usage Guide
+        </h3>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation" role="tablist">
+            <button class="tab-btn active" id="tab-btn-usage" onclick="switchTab('usage')" role="tab" aria-selected="true" aria-controls="tab-content-usage">
+                How to Use
+            </button>
+            <button class="tab-btn" id="tab-btn-states" onclick="switchTab('states')" role="tab" aria-selected="false" aria-controls="tab-content-states">
+                Display States
+            </button>
+            <button class="tab-btn" id="tab-btn-cache" onclick="switchTab('cache')" role="tab" aria-selected="false" aria-controls="tab-content-cache">
+                API Caching & Quota
+            </button>
+        </div>
+
+        <!-- Tab 1: How to Use -->
+        <div class="tab-content active" id="tab-content-usage" role="tabpanel" aria-labelledby="tab-btn-usage">
+            <div class="usage-grid">
+                <div class="usage-card">
+                    <div class="usage-card-num">1</div>
+                    <h4>Configure Settings</h4>
+                    <p>Use the panel above to select your preferred language, tracking limits (days ahead), text theme (dark/light), and custom background colors. Choose which rockets to track specifically or leave unchecked to track all.</p>
+                </div>
+                <div class="usage-card">
+                    <div class="usage-card-num">2</div>
+                    <h4>Copy Code or Link</h4>
+                    <p>Click the <strong>Copy Embed HTML</strong> button to copy the minified, single-line iframe markup. Or click <strong>Copy Embed URL</strong> to get a direct preview link suitable for home dashboards or custom integrations.</p>
+                </div>
+                <div class="usage-card">
+                    <div class="usage-card-num">3</div>
+                    <h4>Embed & Display</h4>
+                    <p>Paste the copied HTML snippet directly into websites or forums supporting iframe embeddings. The widget is fully responsive and adjusts itself to container dimensions.</p>
+                </div>
+            </div>
+            
+            <div class="help-alert">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="color: #4f46e5; flex-shrink: 0; margin-top: 2px;"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                <div>
+                    <strong>Forum BBCode Tips:</strong> If your forum supports BBCode HTML tags (e.g. <span class="help-highlight">[html]...[/html]</span>), you can paste the embed code directly. The widget code is strictly optimized in ES5, contains no newlines (avoiding auto-injected breaks), and escapes sequences that trigger automatic smiley conversion.
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Display States -->
+        <div class="tab-content" id="tab-content-states" role="tabpanel" aria-labelledby="tab-btn-states">
+            <p class="help-section-desc">The widget transitions dynamically between different visual states depending on the status of the launch and timing precision.</p>
+            
+            <div class="help-table-wrapper">
+                <table class="help-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">Launch Status</th>
+                            <th style="width: 20%;">Timer Display</th>
+                            <th style="width: 25%;">Visibility Rules</th>
+                            <th style="width: 30%;">Visual Styling & Behavior</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Go / Launch Pending</strong></td>
+                            <td><span class="help-badge help-badge-go">T- Countdown</span></td>
+                            <td>Visible until NET (scheduled launch time)</td>
+                            <td>Active countdown ticking down (days, hours, mins, secs). Displays weather probability badge if available.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>In Flight</strong></td>
+                            <td><span class="help-badge help-badge-flight">T+ Count-up</span></td>
+                            <td>Visible up to <strong>12 hours</strong> post-liftoff</td>
+                            <td>Active count-up timer. The green <span class="help-highlight">T+</span> badge pulses on even seconds.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>On Hold</strong></td>
+                            <td><span class="help-badge help-badge-hold">T- 00:00:00:00</span></td>
+                            <td>Visible up to <strong>60 minutes</strong> past NET</td>
+                            <td>Timer is frozen at zero. Displays an amber badge and shows a red warning alert detailing the hold reason.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Coarse Date</strong></td>
+                            <td><span class="help-badge help-badge-coarse">Static Date Text</span></td>
+                            <td>Until updated with precise time</td>
+                            <td>Hides ticking timer and shows localized coarse date text (e.g. <em>"Q3 2026"</em> or <em>"Nov 2026"</em>).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>No Upcoming Launch</strong></td>
+                            <td><span class="help-badge help-badge-none">None</span></td>
+                            <td>Shown when no matches exist</td>
+                            <td>Displays the fallback message: <em>"No Launch Scheduled. Check back later."</em></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="font-size: 0.8rem; color: #64748b; line-height: 1.45; font-style: italic; padding-left: 0.5rem; border-left: 3px solid #cbd5e1;">
+                *Note: If the active launch has passed its scheduled time (NET) by more than 30 minutes, the widget automatically switches focus to the next upcoming launch. Users can still navigate back using the pagination controls.
+            </div>
+        </div>
+
+        <!-- Tab 3: API Caching & Quota -->
+        <div class="tab-content" id="tab-content-cache" role="tabpanel" aria-labelledby="tab-btn-cache">
+            <p class="help-section-desc">The widget uses a cache-first approach. It loads cached data from <span class="help-highlight">localStorage</span> instantly on load, then fetches in the background. The update frequency changes dynamically to stay within the Space Devs API limit (15 requests/hour/IP).</p>
+            
+            <div class="help-table-wrapper">
+                <table class="help-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 35%;">API Quota / Status</th>
+                            <th style="width: 35%;">Proximity to Launch (NET)</th>
+                            <th style="width: 30%;">Refresh Interval (TTL)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Launch is On Hold</strong></td>
+                            <td>Any time</td>
+                            <td><strong>2 minutes</strong> <em>(5m when quota is low)</em></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Post-Launch (NET passed)</strong></td>
+                            <td>Any time</td>
+                            <td><strong>5 minutes</strong></td>
+                        </tr>
+                        <tr>
+                            <td rowspan="3"><strong>API Quota Healthy</strong><br><small style="color: #64748b;">(&gt;3 requests remaining)</small></td>
+                            <td>&lt; 5 mins to NET<br>&lt; 1 hour to NET<br>&lt; 6 hours to NET</td>
+                            <td><strong>2 minutes</strong><br><strong>5 minutes</strong><br><strong>10 minutes</strong></td>
+                        </tr>
+                        <tr>
+                            <td>&lt; 24 hours to NET / Coarse date</td>
+                            <td><strong>15 minutes</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Default / Fallback</td>
+                            <td><strong>30 minutes</strong></td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2"><strong>API Quota Low</strong><br><small style="color: #64748b;">(1-3 requests remaining)</small></td>
+                            <td>&lt; 30 mins to NET<br>&lt; 2 hours to NET<br>&lt; 12 hours to NET</td>
+                            <td><strong>5 minutes</strong><br><strong>10 minutes</strong><br><strong>20 minutes</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Default / Fallback</td>
+                            <td><strong>30 minutes</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Quota Depleted</strong> <small style="color: #ef4444;">(0 left)</small></td>
+                            <td>Any time</td>
+                            <td><strong>10 minutes</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Throttled</strong> <small style="color: #ef4444;">(HTTP 429)</small></td>
+                            <td>Any time</td>
+                            <td>Waits until reset time (+5s safety offset)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="help-alert" style="background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.15);">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="color: #10b981; flex-shrink: 0; margin-top: 2px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                <div>
+                    <strong>Free Quota Tracking:</strong> Checking API usage relies on fetching the <span class="help-highlight">/api-throttle/</span> endpoint, which is free and does not count against your rate limit. This ensures the widget always acts intelligently to conserve your calls.
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ================================================================= -->
+    <!-- END OF HELP SECTION                                               -->
+    <!-- ================================================================= -->
+
     <script>
+        function switchTab(tabId) {
+            var buttons = document.querySelectorAll('.tab-btn');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('active');
+                buttons[i].setAttribute('aria-selected', 'false');
+            }
+
+            var contents = document.querySelectorAll('.tab-content');
+            for (var j = 0; j < contents.length; j++) {
+                contents[j].classList.remove('active');
+            }
+
+            var selectedBtn = document.getElementById('tab-btn-' + tabId);
+            if (selectedBtn) {
+                selectedBtn.classList.add('active');
+                selectedBtn.setAttribute('aria-selected', 'true');
+            }
+
+            var selectedContent = document.getElementById('tab-content-' + tabId);
+            if (selectedContent) {
+                selectedContent.classList.add('active');
+            }
+        }
+
         var currentHtml = '';
         function escapeHtml(unsafe) {
             return (unsafe || '').toString()
