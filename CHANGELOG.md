@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.10] - 2026-06-17
 
+### Added
+- **Hold Reason Translation Support**: Added translation logic for the warning box to render `launch.holdreason` using the i18n `holdReason` keys (previously defined but unused).
+
 ### Fixed
 - **In-flight Status Translation**: Added translation and upcoming lists mapping support for the `"Launch in Flight"` status (equivalent to `"In Flight"`).
 

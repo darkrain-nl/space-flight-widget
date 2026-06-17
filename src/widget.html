@@ -920,10 +920,13 @@
 
                     var warningText = '';
                     var lang = langCode || 'en';
+                    var holdLabel = i18n[lang].holdReason || i18n['en'].holdReason || 'Hold Reason: ';
                     var failLabel = i18n[lang].failReason || i18n['en'].failReason || 'Failure Reason: ';
                     var weatherLabel = i18n[lang].weatherConcern || i18n['en'].weatherConcern || 'Weather Concern: ';
 
-                    if (launch.failreason) {
+                    if (launch.holdreason) {
+                        warningText = holdLabel + launch.holdreason;
+                    } else if (launch.failreason) {
                         warningText = failLabel + launch.failreason;
                     } else if (launch.weather_concerns) {
                         warningText = weatherLabel + launch.weather_concerns;
