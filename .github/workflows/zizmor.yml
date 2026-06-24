@@ -27,7 +27,7 @@ jobs:
           persist-credentials: false
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@c4af4cb082260cfbe4f169f4f469956d7a4d5389 # v1.4.1
+        uses: zizmorcore/zizmor-action@192e21d79ab29983730a13d1382995c2307fbcaa # v0.5.7
         with:
           # Enable pedantic checks to enforce high-quality workflow patterns but ignore informational findings
           args: --persona=pedantic --min-severity=low
