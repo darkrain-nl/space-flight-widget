@@ -5,16 +5,25 @@ on:
     - cron: '0 4 * * *' # Run daily at 4:00 AM UTC
   workflow_dispatch: # Allow manual trigger
 
-permissions:
-  contents: write
-  pull-requests: write
+# Cancel in-progress runs for the same branch or pull request
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   check-api-version:
+    name: Check and Update API Version
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to push the updated API version back to the repository
+      pull-requests: write # Required to automatically create a pull request for the API update
     steps:
       - name: Checkout code
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
 
       - name: Check for new Space Devs API version
         id: check_version
