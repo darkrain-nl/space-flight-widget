@@ -29,7 +29,9 @@ jobs:
       - name: Run zizmor
         uses: zizmorcore/zizmor-action@192e21d79ab29983730a13d1382995c2307fbcaa # v0.5.7
         with:
-          # Enable pedantic checks to enforce high-quality workflow patterns but ignore informational findings
-          args: --persona=pedantic --min-severity=low
+          # Enable pedantic checks to enforce high-quality workflow patterns
+          persona: pedantic
+          # Ignore informational findings (only fail on low, medium, or high severity findings)
+          min-severity: low
           # Do not integrate with GHAS (GitHub Advanced Security) to allow standard workflow failure on lint/security findings
           advanced-security: false
