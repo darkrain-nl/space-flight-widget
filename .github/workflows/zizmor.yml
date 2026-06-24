@@ -1,0 +1,35 @@
+name: GitHub Actions Security Analysis with zizmor
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+# Cancel in-progress runs for the same branch or pull request
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  zizmor:
+    name: Run zizmor Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # Required to checkout the repository content
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@c4af4cb082260cfbe4f169f4f469956d7a4d5389 # v1.4.1
+        with:
+          # Enable pedantic checks to enforce high-quality workflow patterns but ignore informational findings
+          args: --persona=pedantic --min-severity=low
+          # Do not integrate with GHAS (GitHub Advanced Security) to allow standard workflow failure on lint/security findings
+          advanced-security: false
