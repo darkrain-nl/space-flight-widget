@@ -18,3 +18,4 @@ __pycache__/
 
 # IDE configurations
 .vscode/
+.agents/
