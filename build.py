@@ -1,6 +1,15 @@
 import os
 import re
 
+SCRIPT_TAG_RE = re.compile(
+    r"<script\b[^>]*>(.*?)</script\b[^>]*>", re.DOTALL | re.IGNORECASE
+)
+
+
+def extract_scripts(source_code):
+    """Return the contents of every <script> block in the given HTML."""
+    return SCRIPT_TAG_RE.findall(source_code)
+
 
 def validate_script(script, i):
     # 1. Check for single-line comments // (excluding http:// and https://)
@@ -44,12 +53,7 @@ def validate_script(script, i):
 
 def minify_code(source_code):
     # Syntax and comment validation checks on Javascript blocks
-    scripts = re.findall(
-        r"<script\b[^>]*>(.*?)</script\b[^>]*>",
-        source_code,
-        flags=re.DOTALL | re.IGNORECASE,
-    )
-    for i, script in enumerate(scripts, 1):
+    for i, script in enumerate(extract_scripts(source_code), 1):
         validate_script(script, i)
 
     # Strip block comments /* ... */ to save bytes in the minified version
