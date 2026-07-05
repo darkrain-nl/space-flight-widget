@@ -5,6 +5,25 @@ All notable changes to the Space Flight Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.14] - 2026-07-05
+
+### Added
+- **Multiple Widgets Per Page**: All timer and refresh state is now per-instance, with a registry that only cleans up a replaced instance (or one removed from the document). Two or more widgets on one page count down and refresh independently instead of the newest one freezing the others.
+- **Hidden-Tab Quota Protection**: Scheduled data fetches are skipped while the tab is hidden and resume (immediately, if overdue) when it becomes visible again, preserving the shared 15-requests/hour API quota.
+- **Language List Consistency Test**: The supported-language list must now be identical in the widget's i18n object, `embed.html` and the preview page's selector, enforced by the test suite.
+
+### Fixed
+- **Broken Avatar Images**: Removed the `encodeURI` call that double-encoded already-encoded API image URLs, added an `onerror` fallback that hides the avatar instead of showing a broken image icon, and widened the pages' CSP `img-src` so thumbnails from any HTTPS host render.
+- **Status Handling Keyed by Stable IDs**: Launch status translation, badge color, hold detection and refresh cadence are now driven by the API's numeric `status.id` instead of English status names. This fixes hold detection that could never match real API data, and adds missing translations for "Launch Failure", "Partial Failure" and "Payload Deployed" in all six languages.
+- **Stale Error States**: The rate-limit and error displays now hide the local-time line and stop the countdown timer, matching the no-launch state (shared `showMessageState` helper).
+- **`data-days` Upper Bound**: The widget itself now enforces the documented 1-365 day window instead of relying on the preview/embed wrappers.
+- **Safer Rate-Limit Retry**: The 429 retry delay now falls back to the structured throttle data and a 5-minute floor instead of hammering a throttled API every 30 seconds when the error prose changes.
+
+### Changed
+- **Leaner API Usage**: The launches query is bounded to the configured display window (`net__lte`), shrinking payloads by ~90% for default configurations, and the throttle status moved to its own localStorage key so cache updates no longer re-serialize the full launch payload multiple times per cycle.
+- **Shared Page Assets**: The widget load/configure/mount pipeline and the light-theme stylesheet now live once in `assets/` and are shared by the preview page and `embed.html`, so the embed code users copy is produced by exactly the code path that renders their iframe.
+- **Test Suite Reuses Build Logic**: `tests/test_quality.py` imports `build.py`'s script extraction and validation instead of maintaining drifting copies; the dist regression test now enforces the full build ruleset.
+
 ## [1.0.12] - 2026-07-05
 
 ### Fixed

@@ -1,4 +1,4 @@
-<div id="space-countdown-widget" data-lang="en" data-version="1.0.12" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
+<div id="space-countdown-widget" data-lang="en" data-version="1.0.14" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
     <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
         <div style="display: flex; align-items: center; gap: 1.5rem; flex: 1; min-width: 250px;">
             <img id="space-avatar" src="" style="display: none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); flex-shrink: 0;" alt="Rocket Thumbnail">
@@ -60,7 +60,7 @@
 
     <div id="space-attribution" style="margin-top: 1.5rem; font-size: 0.65rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.8rem;">
         <div id="space-meta-info" style="color: #94a3b8; text-align: left; font-family: inherit;">
-            <a id="space-version-link" href="https://darkrain-nl.github.io/space-flight-widget/" target="_blank" rel="noopener noreferrer" style="color: #94a3b8; text-decoration: none; transition: color 0.2s;">v1.0.12</a>
+            <a id="space-version-link" href="https://darkrain-nl.github.io/space-flight-widget/" target="_blank" rel="noopener noreferrer" style="color: #94a3b8; text-decoration: none; transition: color 0.2s;">v1.0.14</a>
             <span id="space-meta-text"></span>
         </div>
         <a id="space-attr-link" href="https://thespacedevs.com/" target="_blank" rel="noopener noreferrer" style="color: #94a3b8; text-decoration: none;">Data by The Space Devs</a>
@@ -208,7 +208,7 @@
                 } ;
             }
 
-            var WIDGET_VERSION = '1.0.12';
+            var WIDGET_VERSION = '1.0.14';
             /* Scope the manual-selection key to this widget's configuration so differently-configured widgets on the same origin do not steal each other's selection; identically-configured widgets intentionally share it (and the launch cache) */
             var SELECTED_LAUNCH_KEY = 'space_selected_launch_id_' + langCode + '_' + ALLOWED_ROCKETS.join('-') + '_' + MAX_DAYS;
             var matchedLaunches = [];
