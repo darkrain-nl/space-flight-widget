@@ -32,67 +32,13 @@
             align-items: center;
         }
 
-        /* Light Theme Overrides */
-        #space-countdown-widget.light-theme {
-            color: #1e293b !important;
-        }
-        #space-countdown-widget.light-theme #space-name {
-            background: none !important;
-            -webkit-text-fill-color: #0f172a !important;
-            color: #0f172a !important;
-        }
-        #space-countdown-widget.light-theme #space-title {
-            color: #475569 !important;
-        }
-        #space-countdown-widget.light-theme #space-provider-pad {
-            color: #475569 !important;
-        }
-        #space-countdown-widget.light-theme #space-local-time {
-            color: #4f46e5 !important;
-        }
-        #space-countdown-widget.light-theme #space-timer > div {
-            background: rgba(0, 0, 0, 0.05) !important;
-            color: #0f172a !important;
-        }
-        #space-countdown-widget.light-theme #space-lbl-d,
-        #space-countdown-widget.light-theme #space-lbl-h,
-        #space-countdown-widget.light-theme #space-lbl-m,
-        #space-countdown-widget.light-theme #space-lbl-s {
-            color: #475569 !important;
-        }
-        #space-countdown-widget.light-theme #space-sign-box {
-            background: rgba(79, 70, 229, 0.05) !important;
-            border-color: rgba(79, 70, 229, 0.15) !important;
-        }
-        #space-countdown-widget.light-theme #space-sign {
-            color: #4f46e5 !important;
-        }
-        #space-countdown-widget.light-theme #space-meta-info,
-        #space-countdown-widget.light-theme #space-attr-link {
-            color: #475569 !important;
-        }
-        #space-countdown-widget.light-theme #space-controls-group {
-            background: rgba(0, 0, 0, 0.05) !important;
-            border-color: rgba(0, 0, 0, 0.1) !important;
-        }
-        #space-countdown-widget.light-theme #space-nav-index,
-        #space-countdown-widget.light-theme #space-prev-btn,
-        #space-countdown-widget.light-theme #space-home-btn,
-        #space-countdown-widget.light-theme #space-next-btn,
-        #space-countdown-widget.light-theme #space-refresh-btn {
-            color: #475569 !important;
-        }
-        #space-countdown-widget.light-theme #space-nav-divider {
-            border-left-color: rgba(0, 0, 0, 0.15) !important;
-        }
-        #space-countdown-widget.light-theme #space-attribution {
-            border-top-color: rgba(0, 0, 0, 0.1) !important;
-        }
     </style>
+    <link rel="stylesheet" href="assets/light-theme.css">
 </head>
 <body>
     <div class="widget-wrapper" id="widget-container"></div>
-    
+
+    <script src="assets/widget-loader.js"></script>
     <script>
         (function() {
             var params = new URLSearchParams(window.location.search);
@@ -144,60 +90,20 @@
                 theme = 'dark';
             }
 
-            // Fetch and inject widget
-            fetch('dist/widget.min.html')
-                .then(function(res) {
-                    if (!res.ok) throw new Error('Failed to load widget source');
-                    return res.text();
-                })
-                .then(function(html) {
-                    var parser = new DOMParser();
-                    var doc = parser.parseFromString(html, 'text/html');
-                    var widget = doc.querySelector('#space-countdown-widget');
-                    
-                    if (widget) {
-                        // Set attributes safely on DOM element before injecting into body
-                        widget.setAttribute('data-lang', lang);
-                        if (rockets) {
-                            widget.setAttribute('data-rockets', rockets);
-                        } else {
-                            widget.removeAttribute('data-rockets');
-                        }
-                        widget.setAttribute('data-days', String(days));
-                        
-                        if (theme === 'light') {
-                            widget.classList.add('light-theme');
-                        }
-                        
-                        if (safeBg) {
-                            if (safeBg === 'transparent') {
-                                widget.style.background = 'transparent';
-                                widget.style.backgroundColor = 'transparent';
-                                widget.style.border = 'none';
-                                widget.style.boxShadow = 'none';
-                            } else {
-                                widget.style.background = safeBg;
-                            }
-                        }
-
-                        if (hideAttr) {
-                            var attr = doc.getElementById('space-attribution');
-                            if (attr) {
-                                attr.style.display = 'none';
-                            }
-                        }
-                        
-                        var widgetContainer = document.getElementById('widget-container');
-                        widgetContainer.replaceChildren(widget);
-                        
-                        // Execute script block safely
-                        var scripts = widgetContainer.getElementsByTagName('script');
-                        for (var i = 0; i < scripts.length; i++) {
-                            var newScript = document.createElement('script');
-                            newScript.text = scripts[i].text;
-                            document.body.appendChild(newScript).parentNode.removeChild(newScript);
-                        }
-                    }
+            // Fetch, configure and mount the widget via the shared loader
+            var loader = window.SpaceWidgetLoader;
+            loader.fetchWidgetTemplate('dist/widget.min.html')
+                .then(function(template) {
+                    var html = loader.buildWidgetHtml(template, {
+                        lang: lang,
+                        rockets: rockets,
+                        days: days
+                    });
+                    loader.mountWidget(document.getElementById('widget-container'), html, {
+                        bg: safeBg,
+                        hideAttr: hideAttr,
+                        lightTheme: theme === 'light'
+                    });
                 })
                 .catch(function(err) {
                     var errBox = document.createElement('div');

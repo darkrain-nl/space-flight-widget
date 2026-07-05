@@ -101,11 +101,20 @@ class TestWidgetQualityAndConstraints(unittest.TestCase):
 
     def test_no_unsafe_dom_sinks(self):
         """Verify that no file uses unsafe DOM sinks (assignment to innerHTML/outerHTML, or document.write, insertAdjacentHTML) or blocking native dialogues (alert, confirm, prompt)."""
-        files_to_check = ["src/widget.html", "embed.html", "index.html"]
+        files_to_check = [
+            "src/widget.html",
+            "embed.html",
+            "index.html",
+            "assets/widget-loader.js",
+        ]
 
         for rel_path in files_to_check:
             content = self.read_file_content(rel_path)
-            js_blocks = self.get_javascript_blocks(content)
+            # Plain .js files are one script block; HTML files need extraction
+            if rel_path.endswith(".js"):
+                js_blocks = [content]
+            else:
+                js_blocks = self.get_javascript_blocks(content)
 
             for i, js in enumerate(js_blocks, 1):
                 clean = self.clean_js(js)
