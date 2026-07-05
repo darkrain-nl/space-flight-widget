@@ -847,19 +847,38 @@
             updateWidget();
         }
 
+        var updateWidgetTimer = null;
+        var updateWidgetGeneration = 0;
+
+        // Debounced entry point: rapid input events (e.g. dragging the color
+        // picker) collapse into a single rebuild of the preview widget.
         function updateWidget() {
+            if (updateWidgetTimer) {
+                clearTimeout(updateWidgetTimer);
+            }
+            updateWidgetTimer = setTimeout(doUpdateWidget, 150);
+        }
+
+        function doUpdateWidget() {
             // If simulating past launch, clear cache to force fresh interceptable fetch.
             var simulateCb = document.getElementById('simulate-past-cb');
             if (simulateCb) {
                 var currentSimulateState = simulateCb.checked;
-                if (window.lastSimulateState !== currentSimulateState) {
-                    var wasInitial = (window.lastSimulateState === undefined);
+                if (window.lastSimulateState === undefined) {
+                    // Initial page load: keep the real cache, but drop leftover
+                    // simulated data from a previous session.
+                    window.lastSimulateState = currentSimulateState;
+                    try {
+                        var cached = localStorage.getItem('space_launch_cache');
+                        if (cached && (currentSimulateState || cached.indexOf('mock-launch-id') !== -1)) {
+                            localStorage.removeItem('space_launch_cache');
+                        }
+                    } catch (e) {}
+                } else if (window.lastSimulateState !== currentSimulateState) {
                     window.lastSimulateState = currentSimulateState;
                     try {
                         localStorage.removeItem('space_launch_cache');
-                        if (!wasInitial) {
-                            showToast('Simulation state changed: Local preview cache cleared.', '#f59e0b');
-                        }
+                        showToast('Simulation state changed: Local preview cache cleared.', '#f59e0b');
                     } catch (e) {}
                 }
             }
@@ -944,11 +963,22 @@
             document.getElementById('url-output').value = finalUrl;
 
             var widgetContainer = document.getElementById('widget-container');
-            
-            // Fetch the minified widget so we can inject it fresh
+
+            // Fetch the minified widget so we can inject it fresh. The generation
+            // counter discards out-of-order responses so a slower, stale fetch
+            // can never overwrite the preview/embed code of a newer one.
+            var generation = ++updateWidgetGeneration;
             fetch('dist/widget.min.html')
-                .then(function(res) { return res.text(); })
+                .then(function(res) {
+                    if (!res.ok) {
+                        throw new Error('Failed to load widget template (HTTP ' + res.status + ')');
+                    }
+                    return res.text();
+                })
                 .then(function(html) {
+                    if (generation !== updateWidgetGeneration) {
+                        return;
+                    }
                     // Escape inputs to prevent DOM-based XSS when concatenating into the string
                     var safeLang = escapeHtml(lang);
                     var safeRockets = escapeHtml(rockets);
@@ -999,6 +1029,9 @@
                         newScript.text = scripts[i].text;
                         document.body.appendChild(newScript).parentNode.removeChild(newScript);
                     }
+                })
+                .catch(function(err) {
+                    showToast('Failed to load widget preview: ' + err.message, '#ef4444');
                 });
         }
 

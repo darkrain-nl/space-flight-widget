@@ -44,3 +44,10 @@ jobs:
 
       - name: Build the widget
         run: python3 build.py
+
+      - name: Verify committed artifacts are up to date
+        run: |
+          git diff --exit-code index.html dist/ || {
+            echo "::error::dist/widget.min.html or index.html is stale. Run 'python3 build.py' and commit the result."
+            exit 1
+          }
