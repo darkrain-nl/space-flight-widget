@@ -72,6 +72,7 @@
             var API_URL = API_BASE + '/launches/upcoming/?limit=50';
             var THROTTLE_URL = API_BASE + '/api-throttle/';
             var CACHE_KEY = 'space_launch_cache';
+            var THROTTLE_KEY = 'space_launch_throttle';
             var scripts = document.getElementsByTagName('script');
             var currentScript = scripts[scripts.length - 1];
             var widgetEl = null;
@@ -398,6 +399,24 @@
             }
             window.spaceWidgetMetaInterval = setInterval(updateMetaInfo, 10000);
 
+            /* When the tab becomes visible again, snap the countdown to the correct value and refresh immediately if the data is overdue (fetches are skipped while hidden) */
+            if (window.spaceWidgetVisibilityHandler && document.removeEventListener) {
+                document.removeEventListener('visibilitychange', window.spaceWidgetVisibilityHandler);
+            }
+            if (typeof document.hidden !== 'undefined' && document.addEventListener) {
+                window.spaceWidgetVisibilityHandler = function() {
+                    if (!document.hidden) {
+                        if (window.spaceWidgetTimerInterval) {
+                            updateTimer();
+                        }
+                        if (!isFetching && window.spaceWidgetNextRefreshTime && new Date().getTime() >= window.spaceWidgetNextRefreshTime) {
+                            fetchLaunch();
+                        }
+                    }
+                } ;
+                document.addEventListener('visibilitychange', window.spaceWidgetVisibilityHandler);
+            }
+
             /* Returns interval in ms based on launch proximity */
             /* Returns interval in ms based on launch proximity and API throttle data */
             function getDynamicTTL(launch, throttle) {
@@ -480,15 +499,30 @@
             }
 
             /* Write structured cache to localStorage */
-            function writeCache(data, throttle) {
+            function writeCache(data) {
                 try {
-                    var existing = readCache();
                     var cacheObj = {
                         data: data,
-                        ts: new Date().getTime(),
-                        throttle: (throttle !== undefined && throttle !== null) ? throttle : (existing ? existing.throttle : null)
+                        ts: new Date().getTime()
                     };
                     localStorage.setItem(CACHE_KEY, JSON.stringify(cacheObj) );
+                } catch (e) {}
+            }
+
+            /* Throttle status lives under its own small key so updating it never requires re-serializing the whole launch payload; readers fall back to the throttle field of pre-split cache blobs */
+            function readThrottle() {
+                try {
+                    var raw = localStorage.getItem(THROTTLE_KEY);
+                    if (raw) {
+                        return JSON.parse(raw);
+                    }
+                } catch (e) {}
+                return null;
+            }
+
+            function writeThrottle(throttleObj) {
+                try {
+                    localStorage.setItem(THROTTLE_KEY, JSON.stringify(throttleObj) );
                 } catch (e) {}
             }
 
@@ -571,6 +605,12 @@
                 if (isFetching) {
                     return;
                 }
+                if (!force && typeof document.hidden !== 'undefined' && document.hidden) {
+                    /* Nobody sees a hidden tab - skip the network call to preserve the shared API quota and check again in a minute; the visibility handler refreshes immediately on return */
+                    window.spaceWidgetNextRefreshTime = new Date().getTime();
+                    scheduleFetch(60000);
+                    return;
+                }
                 isFetching = true;
                 updateMetaInfo();
 
@@ -601,21 +641,15 @@
                         return res.json();
                     } )
                     .then(function(throttleData) {
-                        var cache = readCache();
                         var throttleObj = throttleData;
                         window.spaceWidgetCurrentThrottle = throttleObj;
-                        
-                        if (cache) {
-                            cache.throttle = throttleObj;
-                            try {
-                                localStorage.setItem(CACHE_KEY, JSON.stringify(cache) );
-                            } catch (e) {}
-                        }
-                        
+                        writeThrottle(throttleObj);
+
                         var limit = throttleObj.your_request_limit || 15;
                         var currentUse = throttleObj.current_use || 0;
-                        
+
                         if (currentUse >= limit) {
+                            var cache = readCache();
                             if (cache && cache.data) {
                                 renderData(cache.data);
                             } else {
@@ -662,7 +696,9 @@
             }
 
             function doFetchLaunch(throttleObj) {
-                fetchWithTimeout(API_URL, { cache: 'no-store' }, 15000)
+                /* Bound the query to the display window (plus a day of margin) - the default serializer for 50 unbounded launches is a multi-hundred-KB payload of which at most 5 in MAX_DAYS are ever shown */
+                var windowEnd = new Date(new Date().getTime() + (MAX_DAYS + 1) * 86400000).toISOString();
+                fetchWithTimeout(API_URL + '&net__lte=' + encodeURIComponent(windowEnd), { cache: 'no-store' }, 15000)
                     .then(function(res) {
                         if (res.status === 429) {
                             return res.json().then(function(errData) {
@@ -673,14 +709,15 @@
                         return res.json();
                     } )
                     .then(function(data) {
-                        writeCache(data, throttleObj);
+                        writeCache(data);
                         window.spaceWidgetLastFetchTime = new Date().getTime();
-                        window.spaceWidgetCurrentThrottle = throttleObj;
+                        if (throttleObj) {
+                            window.spaceWidgetCurrentThrottle = throttleObj;
+                        }
 
                         var matchedLaunch = renderData(data);
-                        
-                        var cache = readCache();
-                        var interval = getDynamicTTL(matchedLaunch, cache ? cache.throttle : throttleObj);
+
+                        var interval = getDynamicTTL(matchedLaunch, throttleObj || readThrottle());
                         window.spaceWidgetNextRefreshTime = new Date().getTime() + interval;
 
                         scheduleFetch(interval);
@@ -1076,12 +1113,12 @@
             var initCache = readCache();
             if (initCache && initCache.data) {
                 window.spaceWidgetLastFetchTime = initCache.ts;
-                window.spaceWidgetCurrentThrottle = initCache.throttle;
+                window.spaceWidgetCurrentThrottle = readThrottle() || initCache.throttle || null;
 
                 var matchedLaunch = renderData(initCache.data);
                 var now = new Date().getTime();
                 var age = now - (initCache.ts || 0);
-                var ttl = getDynamicTTL(matchedLaunch, initCache.throttle);
+                var ttl = getDynamicTTL(matchedLaunch, window.spaceWidgetCurrentThrottle);
                 
                 var hasFuture = false;
                 if (initCache.data.results && initCache.data.results.length > 0) {
