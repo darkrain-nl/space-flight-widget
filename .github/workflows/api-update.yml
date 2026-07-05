@@ -62,6 +62,8 @@ jobs:
 
       - name: Run Test Suite
         if: env.UPDATE_FOUND == 'true'
+        env:
+          LIVE_API_TEST: '1' # Validate the real API before opening a version-bump PR
         run: python3 -m unittest discover -s tests
 
       - name: Build the widget
