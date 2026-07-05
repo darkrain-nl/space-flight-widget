@@ -1,9 +1,15 @@
 import unittest
 import os
 import re
+import sys
 
 # Base directory setup
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+# Import the build script's own extraction/validation logic so the tests
+# enforce exactly the rules build.py enforces, instead of a drifting copy.
+sys.path.append(BASE_DIR)
+from build import extract_scripts, validate_script  # noqa: E402
 
 
 class TestWidgetQualityAndConstraints(unittest.TestCase):
@@ -14,11 +20,7 @@ class TestWidgetQualityAndConstraints(unittest.TestCase):
 
     def get_javascript_blocks(self, html_content):
         # Extracts everything inside <script>...</script> tags
-        return re.findall(
-            r"<script\b[^>]*>(.*?)</script\b[^>]*>",
-            html_content,
-            flags=re.DOTALL | re.IGNORECASE,
-        )
+        return extract_scripts(html_content)
 
     def clean_js(self, js_content):
         # Remove block comments /* ... */
@@ -200,7 +202,7 @@ class TestWidgetQualityAndConstraints(unittest.TestCase):
         )
 
     def test_smiley_and_comment_regression_on_dist(self):
-        """Verify that dist/widget.min.html has no smiley triggers or single-line comments in script tags."""
+        """Verify that dist/widget.min.html passes the same script validation rules that build.py enforces on the source."""
         minified_path = os.path.join(BASE_DIR, "dist", "widget.min.html")
         if not os.path.exists(minified_path):
             self.skipTest(
@@ -210,25 +212,54 @@ class TestWidgetQualityAndConstraints(unittest.TestCase):
         with open(minified_path, "r", encoding="utf-8") as f:
             minified_code = f.read()
 
-        # Verify no single-line JS comments (excluding urls)
-        js_blocks = self.get_javascript_blocks(minified_code)
-        for i, js in enumerate(js_blocks, 1):
-            if re.search(r"(?<!https:)(?<!http:)\/\/", js):
-                self.fail(
-                    f"Found single-line JS comment '//' in dist/widget.min.html script block #{i}!"
-                )
+        # Run build.py's own validator (comments, smiley triggers, brace/paren
+        # balance) so any rule added there automatically guards dist too.
+        for i, js in enumerate(self.get_javascript_blocks(minified_code), 1):
+            try:
+                validate_script(js, i)
+            except ValueError as e:
+                self.fail(f"dist/widget.min.html failed build validation: {e}")
 
-            # Verify no smiley triggers
-            self.assertNotIn(
-                "})",
-                js,
-                f"Found smiley trigger '}})' in dist/widget.min.html script block #{i}!",
-            )
-            self.assertNotIn(
-                "8)",
-                js,
-                f"Found smiley trigger '8)' in dist/widget.min.html script block #{i}!",
-            )
+    def test_language_lists_consistent(self):
+        """Verify the supported-language list is identical in the widget's i18n object, embed.html's allowedLangs and index.html's language selector."""
+        widget_src = self.read_file_content("src/widget.html")
+        i18n_match = re.search(r"var\s+i18n\s*=\s*\{([\s\S]*?)\n\s*\};", widget_src)
+        self.assertIsNotNone(
+            i18n_match, "Could not find i18n object definition in src/widget.html"
+        )
+        widget_langs = set(
+            re.findall(r"^\s*(\w+)\s*:\s*\{", i18n_match.group(1), flags=re.MULTILINE)
+        )
+        self.assertTrue(widget_langs, "No languages found in widget i18n object")
+
+        embed_src = self.read_file_content("embed.html")
+        embed_match = re.search(r"allowedLangs\s*=\s*\[([^\]]*)\]", embed_src)
+        self.assertIsNotNone(
+            embed_match, "Could not find allowedLangs array in embed.html"
+        )
+        embed_langs = set(re.findall(r"['\"](\w+)['\"]", embed_match.group(1)))
+
+        index_src = self.read_file_content("index.html")
+        select_match = re.search(
+            r'<select[^>]*id="lang-select"[^>]*>([\s\S]*?)</select>', index_src
+        )
+        self.assertIsNotNone(
+            select_match, "Could not find lang-select element in index.html"
+        )
+        index_langs = set(re.findall(r'value="(\w+)"', select_match.group(1)))
+
+        self.assertEqual(
+            widget_langs,
+            embed_langs,
+            "embed.html allowedLangs does not match the widget's i18n languages "
+            "- update both when adding or removing a language.",
+        )
+        self.assertEqual(
+            widget_langs,
+            index_langs,
+            "index.html lang-select options do not match the widget's i18n languages "
+            "- update both when adding or removing a language.",
+        )
 
     def test_widget_version_consistency(self):
         """Verify that the widget's HTML data-version attribute matches the JS WIDGET_VERSION constant, and conforms to Semantic Versioning."""
