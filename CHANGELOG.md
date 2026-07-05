@@ -5,6 +5,19 @@ All notable changes to the Space Flight Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.12] - 2026-07-05
+
+### Fixed
+- **Unsupported Language Crash**: The warning-box labels in `showLaunch` now use the shared i18n fallback, so an unsupported `data-lang` value no longer throws a `TypeError` and leaves the widget permanently stuck on "Loading...".
+- **Coarse Date Precision Mapping**: Aligned `formatCoarseDate` with the Launch Library `net_precision` enumeration (8–11 = Quarters 1–4, 12/13 = Year Halves, 15 = Fiscal Year, 16 = Decade). Launches with "Quarter 1" precision previously rendered as "Decade of <year>".
+- **Refresh Timer Leaks**: All refresh scheduling now goes through a `scheduleFetch()` helper that clears the previously scheduled fetch first, preventing duplicate polling loops (and doubled API quota usage) after slow-network error and rate-limit paths.
+- **Preview Page Cache Wipe**: The preview page no longer clears the widget's `localStorage` cache on every page load; the cache is cleared only when the simulation toggle actually changes or leftover simulated data is detected.
+- **Preview Rebuild Storms & Races**: The preview's `updateWidget` is debounced (150ms) with a stale-response guard, and the widget template fetch now checks `res.ok` and reports failures via toast instead of injecting an error page into the embed code output.
+- **Stale Footer Version**: The static footer fallback text showed `v1.0.2`; it now matches the widget version (previously only corrected at runtime).
+
+### Changed
+- **Build & CI Guardrails**: `build.py` now anchors the `index.html` splice region to the widget block and fails loudly on missing markers; CI verifies that the committed `dist/` and `index.html` artifacts are in sync with `src/widget.html`.
+
 ## [1.0.11] - 2026-06-28
 
 ### Fixed
