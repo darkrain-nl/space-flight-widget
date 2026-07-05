@@ -500,19 +500,23 @@
                 var months = monthNames[langCode] || monthNames['en'];
                 var monthIndex = date.getUTCMonth();
                 
+                /* net_precision ids per the LL2 config/netprecision endpoint: 7=Month, 8-11=Quarter 1-4, 12/13=Year Half 1/2, 14=Year, 15=Fiscal Year, 16=Decade */
                 if (precisionId === 7) {
                     return months[monthIndex] + ' ' + year;
                 }
-                if (precisionId === 7 + 1) {
-                    return 'Decade of ' + year;
-                }
-                if (precisionId === 9 || precisionId === 10 || precisionId === 11) {
+                if (precisionId >= 7 + 1 && precisionId <= 11) {
                     var quarter = Math.floor(monthIndex / 3) + 1;
                     return 'Q' + quarter + ' ' + year;
                 }
-                if (precisionId === 12 || precisionId === 15) {
+                if (precisionId === 12 || precisionId === 13) {
                     var half = monthIndex < 6 ? 'H1' : 'H2';
                     return half + ' ' + year;
+                }
+                if (precisionId === 15) {
+                    return 'FY ' + year;
+                }
+                if (precisionId === 16) {
+                    return 'Decade of ' + year;
                 }
                 return String(year);
             }
@@ -540,6 +544,23 @@
                 } );
             }
 
+            /* Schedule the next fetchLaunch, always clearing any previously scheduled one so only a single refresh loop can exist */
+            function scheduleFetch(delayMs) {
+                if (window.spaceWidgetFetchTimeout) {
+                    clearTimeout(window.spaceWidgetFetchTimeout);
+                }
+                window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, delayMs);
+            }
+
+            /* Common cleanup for every fetch exit path */
+            function finishFetch() {
+                isFetching = false;
+                if (window.spaceWidgetFetchSafetyTimeout) {
+                    clearTimeout(window.spaceWidgetFetchSafetyTimeout);
+                }
+                updateMetaInfo();
+            }
+
             function fetchLaunch(force) {
                 if (isFetching) {
                     return;
@@ -563,7 +584,7 @@
                         isFetching = false;
                         var retryDelay = 60000;
                         window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
-                        window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
+                        scheduleFetch(retryDelay);
                         updateMetaInfo();
                     }
                 }, 30000);
@@ -622,10 +643,8 @@
                             }
                             var retryDelay = (throttleObj.next_use_secs > 0) ? (throttleObj.next_use_secs + 5) * 1000 : 300000;
                             window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
-                            window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
-                            isFetching = false;
-                            if (window.spaceWidgetFetchSafetyTimeout) { clearTimeout(window.spaceWidgetFetchSafetyTimeout); }
-                            updateMetaInfo();
+                            scheduleFetch(retryDelay);
+                            finishFetch();
                             return;
                         }
                         
@@ -657,14 +676,9 @@
                         var cache = readCache();
                         var interval = getDynamicTTL(matchedLaunch, cache ? cache.throttle : throttleObj);
                         window.spaceWidgetNextRefreshTime = new Date().getTime() + interval;
-                        
-                        if (window.spaceWidgetFetchTimeout) {
-                            clearTimeout(window.spaceWidgetFetchTimeout);
-                        }
-                        window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, interval);
-                        isFetching = false;
-                        if (window.spaceWidgetFetchSafetyTimeout) { clearTimeout(window.spaceWidgetFetchSafetyTimeout); }
-                        updateMetaInfo();
+
+                        scheduleFetch(interval);
+                        finishFetch();
                     } )
                     .catch(function(e) {
                         var retryDelay = 30000;
@@ -682,10 +696,8 @@
                         if (cachedObj && cachedObj.data) {
                             renderData(cachedObj.data);
                             window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
-                            window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
-                            isFetching = false;
-                            if (window.spaceWidgetFetchSafetyTimeout) { clearTimeout(window.spaceWidgetFetchSafetyTimeout); }
-                            updateMetaInfo();
+                            scheduleFetch(retryDelay);
+                            finishFetch();
                             return;
                         }
                         
@@ -705,10 +717,8 @@
                         }
                         warningBoxEl.style.display = 'none';
                         window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
-                        window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, retryDelay);
-                        isFetching = false;
-                        if (window.spaceWidgetFetchSafetyTimeout) { clearTimeout(window.spaceWidgetFetchSafetyTimeout); }
-                        updateMetaInfo();
+                        scheduleFetch(retryDelay);
+                        finishFetch();
                     } );
             }
 
@@ -919,17 +929,12 @@
                     }
 
                     var warningText = '';
-                    var lang = langCode || 'en';
-                    var holdLabel = i18n[lang].holdReason || i18n['en'].holdReason || 'Hold Reason: ';
-                    var failLabel = i18n[lang].failReason || i18n['en'].failReason || 'Failure Reason: ';
-                    var weatherLabel = i18n[lang].weatherConcern || i18n['en'].weatherConcern || 'Weather Concern: ';
-
                     if (launch.holdreason) {
-                        warningText = holdLabel + launch.holdreason;
+                        warningText = t.holdReason + launch.holdreason;
                     } else if (launch.failreason) {
-                        warningText = failLabel + launch.failreason;
+                        warningText = t.failReason + launch.failreason;
                     } else if (launch.weather_concerns) {
-                        warningText = weatherLabel + launch.weather_concerns;
+                        warningText = t.weatherConcern + launch.weather_concerns;
                     }
 
                     if (warningText) {
@@ -1083,10 +1088,7 @@
                 } else {
                     var remaining = ttl - age;
                     window.spaceWidgetNextRefreshTime = now + (remaining > 1000 ? remaining : 1000);
-                    if (window.spaceWidgetFetchTimeout) {
-                        clearTimeout(window.spaceWidgetFetchTimeout);
-                    }
-                    window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, remaining > 1000 ? remaining : 1000);
+                    scheduleFetch(remaining > 1000 ? remaining : 1000);
                     updateMetaInfo();
                 }
             } else {
