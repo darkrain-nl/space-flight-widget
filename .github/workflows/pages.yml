@@ -30,6 +30,11 @@ jobs:
           persist-credentials: false
       - name: Setup Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - name: Build fresh artifacts
+        # Regenerate dist/widget.min.html and the index.html widget block from
+        # src/widget.html at deploy time, so the live site can never serve a
+        # stale committed artifact (build.py is stdlib-only)
+        run: python3 build.py
       - name: Prepare Public Directory
         run: |
           mkdir public
