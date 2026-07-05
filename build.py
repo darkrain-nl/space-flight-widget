@@ -81,9 +81,17 @@ def build():
 
     start_marker = '<div id="space-countdown-widget"'
 
+    # Anchor every search to the previous match so the splice region cannot
+    # accidentally resolve to an unrelated </script> or </div> elsewhere in
+    # the file (e.g. if a script tag is ever added above the widget block).
     start_idx = index_content.find(start_marker)
-    # The end marker might vary slightly if the user edited it, so we find the closing div after the script
-    end_idx = index_content.find("</div>", index_content.find("</script>")) + 6
+    end_idx = -1
+    if start_idx != -1:
+        script_close_idx = index_content.find("</script>", start_idx)
+        if script_close_idx != -1:
+            div_close_idx = index_content.find("</div>", script_close_idx)
+            if div_close_idx != -1:
+                end_idx = div_close_idx + len("</div>")
 
     if start_idx != -1 and end_idx != -1:
         new_index = index_content[:start_idx] + minified + index_content[end_idx:]
@@ -92,10 +100,9 @@ def build():
         print("Successfully minified src/widget.html -> dist/widget.min.html")
         print("Successfully updated index.html with new minified widget code!")
     else:
-        print(
-            "Warning: Could not automatically inject into index.html (markers not found)."
-        )
+        print("Error: Could not inject into index.html (widget markers not found).")
         print("Your minified code is ready in dist/widget.min.html")
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
