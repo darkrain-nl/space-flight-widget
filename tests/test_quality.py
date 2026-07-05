@@ -9,7 +9,7 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 # Import the build script's own extraction/validation logic so the tests
 # enforce exactly the rules build.py enforces, instead of a drifting copy.
 sys.path.append(BASE_DIR)
-from build import extract_scripts, validate_script  # noqa: E402
+from build import clean_js_for_analysis, extract_scripts, validate_script  # noqa: E402
 
 
 class TestWidgetQualityAndConstraints(unittest.TestCase):
@@ -23,15 +23,10 @@ class TestWidgetQualityAndConstraints(unittest.TestCase):
         return extract_scripts(html_content)
 
     def clean_js(self, js_content):
-        # Remove block comments /* ... */
-        js_content = re.sub(r"/\*.*?\*/", "", js_content, flags=re.DOTALL)
-        # Remove single line comments // ... (excluding URL protocols)
-        js_content = re.sub(r"(?<!https:)(?<!http:)\/\/.*", "", js_content)
-        # Remove double-quoted strings
-        js_content = re.sub(r'"[^"\\]*(?:\\.[^"\\]*)*"', "", js_content)
-        # Remove single-quoted strings
-        js_content = re.sub(r"'[^'\\]*(?:\\.[^'\\]*)*'", "", js_content)
-        return js_content
+        # Remove comments and blank string contents via build.py's
+        # string/regex-aware scanner, so a '//' or quote inside a literal
+        # can never desynchronize the cleaning and mask violations.
+        return clean_js_for_analysis(js_content)
 
     def test_es5_conformance(self):
         """Verify that the JavaScript code uses only ES5 syntax and doesn't contain ES6+ features."""

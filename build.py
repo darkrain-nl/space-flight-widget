@@ -5,10 +5,114 @@ SCRIPT_TAG_RE = re.compile(
     r"<script\b[^>]*>(.*?)</script\b[^>]*>", re.DOTALL | re.IGNORECASE
 )
 
+PLAIN_BLOCK_COMMENT_RE = re.compile(r"/\*.*?\*/", re.DOTALL)
+
+# Characters after which a '/' starts a regex literal rather than division
+# (standard heuristic; a '/' after a value would be division)
+_REGEX_PRECEDING_CHARS = "([{=,:;!&|?+-*%~^<>"
+
 
 def extract_scripts(source_code):
     """Return the contents of every <script> block in the given HTML."""
     return SCRIPT_TAG_RE.findall(source_code)
+
+
+def _scan_js(script, remove_line_comments, blank_strings):
+    """Single-pass JavaScript scanner used for comment stripping and static
+    analysis. Removes /* ... */ comments without ever touching the inside of
+    string or regex literals; optionally removes // comments (string-aware,
+    so URLs are safe) and blanks string literal contents (so patterns inside
+    strings cannot mask or fake violations in the quality checks)."""
+    out = []
+    i = 0
+    n = len(script)
+    last_code = ""  # last non-whitespace character emitted
+    while i < n:
+        c = script[i]
+        nxt = script[i + 1] if i + 1 < n else ""
+        if c == "/" and nxt == "*":
+            end = script.find("*/", i + 2)
+            i = n if end == -1 else end + 2
+            continue
+        if remove_line_comments and c == "/" and nxt == "/":
+            end = script.find("\n", i + 2)
+            i = n if end == -1 else end
+            continue
+        if c in ("'", '"'):
+            quote = c
+            out.append(c)
+            i += 1
+            while i < n:
+                s = script[i]
+                if s == "\\":
+                    if not blank_strings:
+                        out.append(script[i : i + 2])
+                    i += 2
+                    continue
+                if s == quote:
+                    out.append(s)
+                    i += 1
+                    break
+                if not blank_strings:
+                    out.append(s)
+                i += 1
+            last_code = quote
+            continue
+        if c == "/" and (last_code == "" or last_code in _REGEX_PRECEDING_CHARS):
+            # Regex literal: copy verbatim up to the unescaped closing '/',
+            # so quotes or comment markers inside it cannot derail the scan
+            start = i
+            i += 1
+            in_class = False
+            while i < n:
+                r = script[i]
+                if r == "\\":
+                    i += 2
+                    continue
+                if r == "[":
+                    in_class = True
+                elif r == "]":
+                    in_class = False
+                elif r == "/" and not in_class:
+                    i += 1
+                    break
+                elif r == "\n":
+                    break
+                i += 1
+            out.append(script[start:i])
+            last_code = "/"
+            continue
+        out.append(c)
+        if not c.isspace():
+            last_code = c
+        i += 1
+    return "".join(out)
+
+
+def strip_js_block_comments(script):
+    """Remove /* ... */ comments from JavaScript without corrupting string
+    or regex literals that contain comment markers."""
+    return _scan_js(script, remove_line_comments=False, blank_strings=False)
+
+
+def clean_js_for_analysis(script):
+    """Prepare JavaScript for static checks: remove all comments and blank
+    out string literal contents."""
+    return _scan_js(script, remove_line_comments=True, blank_strings=True)
+
+
+def strip_block_comments(source_code):
+    """Strip /* ... */ comments from an HTML document: string/regex-aware
+    inside <script> blocks, plain regex elsewhere (HTML and inline CSS
+    contain no string literals that need protecting)."""
+    result = []
+    last = 0
+    for m in SCRIPT_TAG_RE.finditer(source_code):
+        result.append(PLAIN_BLOCK_COMMENT_RE.sub("", source_code[last : m.start(1)]))
+        result.append(strip_js_block_comments(m.group(1)))
+        last = m.end(1)
+    result.append(PLAIN_BLOCK_COMMENT_RE.sub("", source_code[last:]))
+    return "".join(result)
 
 
 def validate_script(script, i):
@@ -50,6 +154,23 @@ def validate_script(script, i):
             "Please write '8 )' or '7 + 1' instead."
         )
 
+    # 5. Check for line endings that automatic semicolon insertion would
+    # reinterpret when the build joins all lines into one: a bare
+    # 'return'/'break'/'continue'/'throw' silently captures the next line's
+    # expression, and a trailing ++/-- attaches to the next line.
+    for lineno, raw_line in enumerate(script.split("\n"), 1):
+        line = raw_line.strip()
+        if (
+            re.search(r"\b(?:return|break|continue|throw)$", line)
+            or line.endswith("++")
+            or line.endswith("--")
+        ):
+            raise ValueError(
+                f"Error: Line {lineno} of JavaScript block #{i} ends in a token "
+                f"that changes meaning when minified onto a single line: {line!r}. "
+                "Keep the statement on one line."
+            )
+
 
 def minify_code(source_code):
     # Syntax and comment validation checks on Javascript blocks
@@ -57,12 +178,20 @@ def minify_code(source_code):
         validate_script(script, i)
 
     # Strip block comments /* ... */ to save bytes in the minified version
-    minified_src = re.sub(r"/\*.*?\*/", "", source_code, flags=re.DOTALL)
+    # (string/regex-aware inside scripts so literals are never corrupted)
+    minified_src = strip_block_comments(source_code)
 
     # Minify the code
     # Split by lines, strip leading/trailing spaces, and join into a single string
     lines = minified_src.split("\n")
-    return "".join([line.strip() for line in lines])
+    minified = "".join([line.strip() for line in lines])
+
+    # Re-validate the final output: joining lines can itself create smiley
+    # sequences or unbalanced blocks that the source-level checks cannot see
+    for i, script in enumerate(extract_scripts(minified), 1):
+        validate_script(script, i)
+
+    return minified
 
 
 def build():

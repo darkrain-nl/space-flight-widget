@@ -4,7 +4,12 @@ import os
 
 # Add parent directory to path so we can import build
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from build import minify_code
+from build import (
+    clean_js_for_analysis,
+    minify_code,
+    strip_js_block_comments,
+    validate_script,
+)
 
 
 class TestBuildMinifier(unittest.TestCase):
@@ -113,6 +118,60 @@ class TestBuildMinifier(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx2:
             minify_code(sample_code2)
         self.assertIn("smiley-triggering sequence '8)'", str(ctx2.exception))
+
+    def test_comment_marker_inside_string_preserved(self):
+        # A string literal containing /* or */ must survive minification
+        sample_code = """
+        <div>
+            <script>
+                var a = 'not /* a comment */ at all';
+                var b = 1; /* real comment */
+            </script>
+        </div>
+        """
+        minified = minify_code(sample_code)
+        self.assertIn("not /* a comment */ at all", minified)
+        self.assertNotIn("real comment", minified)
+
+    def test_comment_marker_inside_regex_preserved(self):
+        js = "var re = str.match(/a\\/\\*b/); /* gone */"
+        out = strip_js_block_comments(js)
+        self.assertIn("/a\\/\\*b/", out)
+        self.assertNotIn("gone", out)
+
+    def test_asi_hazard_line_endings_throw(self):
+        for bad_line in ["return", "counter++", "counter--"]:
+            script = "function f() {\n    " + bad_line + "\n}"
+            with self.assertRaises(ValueError) as ctx:
+                validate_script(script, 1)
+            self.assertIn("changes meaning when minified", str(ctx.exception))
+
+    def test_minified_output_is_revalidated(self):
+        # A '}' line followed by a ')' line fuses into the '})' smiley when
+        # joined; the source contains no '})' so only the post-minification
+        # validation can catch it
+        sample_code = "<script>f(function() {\n}\n);\n</script>"
+        with self.assertRaises(ValueError) as ctx:
+            minify_code(sample_code)
+        self.assertIn("smiley-triggering sequence '})'", str(ctx.exception))
+
+    def test_clean_js_blanks_strings_and_handles_slashes(self):
+        js = (
+            "var u = 'https://example.com/x'; // trailing comment\n"
+            "var v = '//not-a-comment';\n"
+            "var w = s.replace(/\"/g, 'quote');\n"
+            "var innerHTMLish = 'innerHTML = bad';\n"
+            "var z = 1;"
+        )
+        out = clean_js_for_analysis(js)
+        # Comments removed, code preserved
+        self.assertNotIn("trailing comment", out)
+        self.assertIn("var z = 1;", out)
+        # String contents blanked (so they cannot fake violations), quotes kept
+        self.assertIn("var v = '';", out)
+        self.assertNotIn("innerHTML = bad", out)
+        # A quote inside a regex literal must not desynchronize the scan
+        self.assertIn("var innerHTMLish", out)
 
 
 if __name__ == "__main__":
