@@ -28,16 +28,25 @@ jobs:
       - name: Check for new Space Devs API version
         id: check_version
         run: |
-          LATEST_VERSION=$(curl -s https://ll.thespacedevs.com/docs/ | grep -oP 'url: "/\K[0-9]+\.[0-9]+\.[0-9]+(?=/json")')
-          CURRENT_VERSION=$(grep -oP 'thespacedevs\.com/\K[0-9]+\.[0-9]+\.[0-9]+' src/widget.html | head -n 1)
+          # sort -V | tail -1 keeps the highest version if the docs page ever
+          # advertises more than one, and guarantees a single-line value
+          LATEST_VERSION=$(curl -s https://ll.thespacedevs.com/docs/ | grep -oP 'url: "/\K[0-9]+\.[0-9]+\.[0-9]+(?=/json")' | sort -V | tail -n 1)
+          CURRENT_VERSION=$(grep -oP 'll\.thespacedevs\.com/\K[0-9]+\.[0-9]+\.[0-9]+' src/widget.html | head -n 1)
 
-          if [ -z "$LATEST_VERSION" ]; then
-            echo "Could not fetch latest version from thespacedevs.com"
+          if ! echo "$LATEST_VERSION" | grep -qP '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Could not extract a valid latest version from the thespacedevs.com docs page (got: '$LATEST_VERSION')"
             exit 1
           fi
 
           if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; then
             echo "New API version found: $LATEST_VERSION (Current: $CURRENT_VERSION)"
+
+            # Verify the advertised endpoint actually exists before pointing the widget at it
+            if ! curl -sf "https://ll.thespacedevs.com/$LATEST_VERSION/json" -o /dev/null; then
+              echo "Version $LATEST_VERSION is advertised but /$LATEST_VERSION/json is not reachable"
+              exit 1
+            fi
+
             echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
             echo "UPDATE_FOUND=true" >> $GITHUB_ENV
 
@@ -47,8 +56,19 @@ jobs:
             curl -s "https://ll.thespacedevs.com/$LATEST_VERSION/json" | jq -r '.info.description' | awk '/### Announcements/{flag=1; next} /^## /{flag=0} flag' | sed '/^[[:space:]]*$/d' >> $GITHUB_ENV
             echo "$EOF" >> $GITHUB_ENV
 
-            # Update the API URL inside src/widget.html
-            sed -i "s/$CURRENT_VERSION/$LATEST_VERSION/g" src/widget.html
+            # Update only the API base URL - an anchored replacement can never
+            # touch other version-like strings (e.g. WIDGET_VERSION)
+            sed -i "s|ll\.thespacedevs\.com/$CURRENT_VERSION|ll.thespacedevs.com/$LATEST_VERSION|g" src/widget.html
+
+            # Fail loudly if the replacement did not land exactly as intended
+            if ! grep -q "ll.thespacedevs.com/$LATEST_VERSION" src/widget.html; then
+              echo "URL replacement failed: new version not present in src/widget.html"
+              exit 1
+            fi
+            if grep -q "ll.thespacedevs.com/$CURRENT_VERSION" src/widget.html; then
+              echo "URL replacement failed: old version still present in src/widget.html"
+              exit 1
+            fi
           else
             echo "API version $CURRENT_VERSION is up to date."
             echo "UPDATE_FOUND=false" >> $GITHUB_ENV
