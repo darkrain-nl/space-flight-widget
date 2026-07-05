@@ -5,6 +5,17 @@ All notable changes to the Space Flight Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.15] - 2026-07-05
+
+### Fixed
+- **Decade Label Translation**: Launches with "Decade" precision now render a translated label via the new `decadeOf` i18n key in all six languages, instead of hardcoded English "Decade of <year>".
+
+### Changed
+- **CI Without Live API Dependency**: The test suite validates the widget's API field expectations against a checked-in fixture; the live API is only checked by the daily version-update workflow, where a failure correctly blocks an unverified automated bump.
+- **Safer Minification**: The build strips comments with a string/regex-aware scanner (literals containing comment markers can no longer be corrupted), re-validates the minified output, and rejects line endings that automatic semicolon insertion would reinterpret. The quality tests reuse the same scanner.
+- **Hardened API Version Updater**: The daily version bump replaces only the anchored API URL (it can never touch other version-like strings), validates the scraped version, verifies the new endpoint is reachable, and fails loudly if the replacement did not land exactly.
+- **Deploy-Time Build**: GitHub Pages regenerates `dist/widget.min.html` and the `index.html` widget block from source at deploy time, so the live site can never serve a stale committed artifact.
+
 ## [1.0.14] - 2026-07-05
 
 ### Added
