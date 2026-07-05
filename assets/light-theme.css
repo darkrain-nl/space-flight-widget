@@ -1,0 +1,60 @@
+/* Light Theme Overrides for the space countdown widget.
+   Shared by index.html (preview page) and embed.html (iframe embeds) -
+   edit here, never copy into the pages. The widget itself ships inline
+   dark-theme styles; this sheet only overrides them when the root
+   element carries the light-theme class. */
+#space-countdown-widget.light-theme {
+    color: #1e293b !important;
+}
+#space-countdown-widget.light-theme #space-name {
+    background: none !important;
+    -webkit-text-fill-color: #0f172a !important;
+    color: #0f172a !important;
+}
+#space-countdown-widget.light-theme #space-title {
+    color: #475569 !important;
+}
+#space-countdown-widget.light-theme #space-provider-pad {
+    color: #475569 !important;
+}
+#space-countdown-widget.light-theme #space-local-time {
+    color: #4f46e5 !important;
+}
+#space-countdown-widget.light-theme #space-timer > div {
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: #0f172a !important;
+}
+#space-countdown-widget.light-theme #space-lbl-d,
+#space-countdown-widget.light-theme #space-lbl-h,
+#space-countdown-widget.light-theme #space-lbl-m,
+#space-countdown-widget.light-theme #space-lbl-s {
+    color: #475569 !important;
+}
+#space-countdown-widget.light-theme #space-sign-box {
+    background: rgba(79, 70, 229, 0.05) !important;
+    border-color: rgba(79, 70, 229, 0.15) !important;
+}
+#space-countdown-widget.light-theme #space-sign {
+    color: #4f46e5 !important;
+}
+#space-countdown-widget.light-theme #space-meta-info,
+#space-countdown-widget.light-theme #space-attr-link {
+    color: #475569 !important;
+}
+#space-countdown-widget.light-theme #space-controls-group {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+#space-countdown-widget.light-theme #space-nav-index,
+#space-countdown-widget.light-theme #space-prev-btn,
+#space-countdown-widget.light-theme #space-home-btn,
+#space-countdown-widget.light-theme #space-next-btn,
+#space-countdown-widget.light-theme #space-refresh-btn {
+    color: #475569 !important;
+}
+#space-countdown-widget.light-theme #space-nav-divider {
+    border-left-color: rgba(0, 0, 0, 0.15) !important;
+}
+#space-countdown-widget.light-theme #space-attribution {
+    border-top-color: rgba(0, 0, 0, 0.1) !important;
+}
