@@ -209,15 +209,24 @@
             }
 
             var WIDGET_VERSION = '1.0.12';
-            var SELECTED_LAUNCH_KEY = 'space_selected_launch_id';
+            /* Scope the manual-selection key to this widget's configuration so differently-configured widgets on the same origin do not steal each other's selection; identically-configured widgets intentionally share it (and the launch cache) */
+            var SELECTED_LAUNCH_KEY = 'space_selected_launch_id_' + langCode + '_' + ALLOWED_ROCKETS.join('-') + '_' + MAX_DAYS;
             var matchedLaunches = [];
             var currentSelectedIndex = 0;
             var defaultSelectedIndex = 0;
             var targetDate;
             var isHold = false;
             var isFetching = false;
-            window.spaceWidgetLastFetchTime = window.spaceWidgetLastFetchTime || null;
-            window.spaceWidgetCurrentThrottle = window.spaceWidgetCurrentThrottle || null;
+            /* All timer and refresh state is per-instance (closure-local) so multiple widgets can coexist on one page; a shared registry below handles cleanup when an instance is replaced */
+            var destroyed = false;
+            var timerInterval = null;
+            var fetchTimeout = null;
+            var fetchSafetyTimeout = null;
+            var metaInterval = null;
+            var visibilityHandler = null;
+            var nextRefreshTime = null;
+            var lastFetchTime = null;
+            var currentThrottle = null;
             var metaInfoEl = getWidgetEl('space-meta-info');
             var versionLinkEl = getWidgetEl('space-version-link');
             var metaTextEl = getWidgetEl('space-meta-text');
@@ -325,8 +334,8 @@
                 if (!metaInfoEl) return;
                 var now = new Date().getTime();
                 var statusParts = [];
-                if (window.spaceWidgetLastFetchTime) {
-                    var diffMs = now - window.spaceWidgetLastFetchTime;
+                if (lastFetchTime) {
+                    var diffMs = now - lastFetchTime;
                     var diffMins = Math.floor(diffMs / 60000);
                     if (diffMins < 1) {
                         statusParts.push(t.metaUpdatedLessMin);
@@ -334,15 +343,15 @@
                         statusParts.push(t.metaUpdatedMin.replace('{min}', diffMins));
                     }
                 }
-                if (window.spaceWidgetCurrentThrottle) {
-                    var limit = window.spaceWidgetCurrentThrottle.your_request_limit || 15;
-                    var currentUse = window.spaceWidgetCurrentThrottle.current_use || 0;
+                if (currentThrottle) {
+                    var limit = currentThrottle.your_request_limit || 15;
+                    var currentUse = currentThrottle.current_use || 0;
                     statusParts.push(t.metaCalls.replace('{use}', currentUse).replace('{lim}', limit));
                 }
                 if (isFetching) {
                     statusParts.push(t.metaRefreshing);
-                } else if (window.spaceWidgetNextRefreshTime) {
-                    var nextDiffMs = window.spaceWidgetNextRefreshTime - now;
+                } else if (nextRefreshTime) {
+                    var nextDiffMs = nextRefreshTime - now;
                     if (nextDiffMs <= 0) {
                         statusParts.push(t.metaNextSoon);
                     } else {
@@ -359,37 +368,57 @@
                 }
             }
 
-            /* Clear any active timers/timeouts from prior script runs on the page */
-            if (window.spaceWidgetTimerInterval) {
-                clearInterval(window.spaceWidgetTimerInterval);
+            /* Stop this instance's timers and listeners and refuse further scheduling; called via the registry when a newer instance replaces this one */
+            function destroyInstance() {
+                destroyed = true;
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
+                if (fetchTimeout) {
+                    clearTimeout(fetchTimeout);
+                }
+                if (fetchSafetyTimeout) {
+                    clearTimeout(fetchSafetyTimeout);
+                }
+                if (metaInterval) {
+                    clearInterval(metaInterval);
+                }
+                if (visibilityHandler && document.removeEventListener) {
+                    document.removeEventListener('visibilitychange', visibilityHandler);
+                }
             }
-            if (window.spaceWidgetFetchTimeout) {
-                clearTimeout(window.spaceWidgetFetchTimeout);
+
+            /* Instance registry: destroy only a prior instance bound to the same widget element (a preview re-init) or one whose element left the document - sibling widgets on the same page keep running */
+            if (!window.spaceWidgetInstances) {
+                window.spaceWidgetInstances = [];
             }
-            if (window.spaceWidgetFetchSafetyTimeout) {
-                clearTimeout(window.spaceWidgetFetchSafetyTimeout);
+            var registry = window.spaceWidgetInstances;
+            for (var ri = registry.length - 1; ri >= 0; ri--) {
+                var isStale = registry[ri].el === widgetEl || !registry[ri].el || !document.body.contains(registry[ri].el);
+                if (isStale) {
+                    try {
+                        registry[ri].destroy();
+                    } catch (ex) {}
+                    registry.splice(ri, 1);
+                }
             }
-            if (window.spaceWidgetMetaInterval) {
-                clearInterval(window.spaceWidgetMetaInterval);
-            }
-            window.spaceWidgetMetaInterval = setInterval(updateMetaInfo, 10000);
+            registry.push({ el: widgetEl, destroy: destroyInstance } );
+
+            metaInterval = setInterval(updateMetaInfo, 10000);
 
             /* When the tab becomes visible again, snap the countdown to the correct value and refresh immediately if the data is overdue (fetches are skipped while hidden) */
-            if (window.spaceWidgetVisibilityHandler && document.removeEventListener) {
-                document.removeEventListener('visibilitychange', window.spaceWidgetVisibilityHandler);
-            }
             if (typeof document.hidden !== 'undefined' && document.addEventListener) {
-                window.spaceWidgetVisibilityHandler = function() {
-                    if (!document.hidden) {
-                        if (window.spaceWidgetTimerInterval) {
+                visibilityHandler = function() {
+                    if (!destroyed && !document.hidden) {
+                        if (timerInterval) {
                             updateTimer();
                         }
-                        if (!isFetching && window.spaceWidgetNextRefreshTime && new Date().getTime() >= window.spaceWidgetNextRefreshTime) {
+                        if (!isFetching && nextRefreshTime && new Date().getTime() >= nextRefreshTime) {
                             fetchLaunch();
                         }
                     }
                 } ;
-                document.addEventListener('visibilitychange', window.spaceWidgetVisibilityHandler);
+                document.addEventListener('visibilitychange', visibilityHandler);
             }
 
             /* Status semantics keyed by the stable status.id (LL2 config/launch_statuses): 1=Go for Launch, 2=TBD, 3=Launch Successful, 4=Launch Failure, 5=On Hold, 6=Launch in Flight, 7=Partial Failure, 8=TBC, 9=Payload Deployed. The English status.name is display-only and can be reworded upstream */
@@ -606,57 +635,60 @@
                     controlsGroupEl.style.display = 'inline-flex';
                 }
                 warningBoxEl.style.display = 'none';
-                if (window.spaceWidgetTimerInterval) {
-                    clearInterval(window.spaceWidgetTimerInterval);
+                if (timerInterval) {
+                    clearInterval(timerInterval);
                 }
             }
 
-            /* Schedule the next fetchLaunch, always clearing any previously scheduled one so only a single refresh loop can exist */
+            /* Schedule the next fetchLaunch, always clearing any previously scheduled one so only a single refresh loop can exist; a destroyed instance never reschedules (kills zombie loops from in-flight fetches) */
             function scheduleFetch(delayMs) {
-                if (window.spaceWidgetFetchTimeout) {
-                    clearTimeout(window.spaceWidgetFetchTimeout);
+                if (fetchTimeout) {
+                    clearTimeout(fetchTimeout);
                 }
-                window.spaceWidgetFetchTimeout = setTimeout(fetchLaunch, delayMs);
+                if (destroyed) {
+                    return;
+                }
+                fetchTimeout = setTimeout(fetchLaunch, delayMs);
             }
 
             /* Common cleanup for every fetch exit path */
             function finishFetch() {
                 isFetching = false;
-                if (window.spaceWidgetFetchSafetyTimeout) {
-                    clearTimeout(window.spaceWidgetFetchSafetyTimeout);
+                if (fetchSafetyTimeout) {
+                    clearTimeout(fetchSafetyTimeout);
                 }
                 updateMetaInfo();
             }
 
             function fetchLaunch(force) {
-                if (isFetching) {
+                if (isFetching || destroyed) {
                     return;
                 }
                 if (!force && typeof document.hidden !== 'undefined' && document.hidden) {
                     /* Nobody sees a hidden tab - skip the network call to preserve the shared API quota and check again in a minute; the visibility handler refreshes immediately on return */
-                    window.spaceWidgetNextRefreshTime = new Date().getTime();
+                    nextRefreshTime = new Date().getTime();
                     scheduleFetch(60000);
                     return;
                 }
                 isFetching = true;
                 updateMetaInfo();
 
-                if (window.spaceWidgetTimerInterval) {
-                    clearInterval(window.spaceWidgetTimerInterval);
+                if (timerInterval) {
+                    clearInterval(timerInterval);
                 }
-                if (window.spaceWidgetFetchTimeout) {
-                    clearTimeout(window.spaceWidgetFetchTimeout);
+                if (fetchTimeout) {
+                    clearTimeout(fetchTimeout);
                 }
 
                 /* Safety timeout: force-reset isFetching after 30s to prevent permanent hang */
-                if (window.spaceWidgetFetchSafetyTimeout) {
-                    clearTimeout(window.spaceWidgetFetchSafetyTimeout);
+                if (fetchSafetyTimeout) {
+                    clearTimeout(fetchSafetyTimeout);
                 }
-                window.spaceWidgetFetchSafetyTimeout = setTimeout(function() {
+                fetchSafetyTimeout = setTimeout(function() {
                     if (isFetching) {
                         isFetching = false;
                         var retryDelay = 60000;
-                        window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
+                        nextRefreshTime = new Date().getTime() + retryDelay;
                         scheduleFetch(retryDelay);
                         updateMetaInfo();
                     }
@@ -668,8 +700,11 @@
                         return res.json();
                     } )
                     .then(function(throttleData) {
+                        if (destroyed) {
+                            return;
+                        }
                         var throttleObj = throttleData;
-                        window.spaceWidgetCurrentThrottle = throttleObj;
+                        currentThrottle = throttleObj;
                         writeThrottle(throttleObj);
 
                         var limit = throttleObj.your_request_limit || 15;
@@ -695,7 +730,7 @@
                                 }, 5000);
                             }
                             var retryDelay = (throttleObj.next_use_secs > 0) ? (throttleObj.next_use_secs + 5) * 1000 : 300000;
-                            window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
+                            nextRefreshTime = new Date().getTime() + retryDelay;
                             scheduleFetch(retryDelay);
                             finishFetch();
                             return;
@@ -704,7 +739,9 @@
                         doFetchLaunch(throttleObj);
                     } )
                     .catch(function() {
-                        doFetchLaunch(null);
+                        if (!destroyed) {
+                            doFetchLaunch(null);
+                        }
                     } );
             }
 
@@ -723,20 +760,26 @@
                     } )
                     .then(function(data) {
                         writeCache(data);
-                        window.spaceWidgetLastFetchTime = new Date().getTime();
+                        if (destroyed) {
+                            return;
+                        }
+                        lastFetchTime = new Date().getTime();
                         if (throttleObj) {
-                            window.spaceWidgetCurrentThrottle = throttleObj;
+                            currentThrottle = throttleObj;
                         }
 
                         var matchedLaunch = renderData(data);
 
                         var interval = getDynamicTTL(matchedLaunch, throttleObj || readThrottle());
-                        window.spaceWidgetNextRefreshTime = new Date().getTime() + interval;
+                        nextRefreshTime = new Date().getTime() + interval;
 
                         scheduleFetch(interval);
                         finishFetch();
                     } )
                     .catch(function(e) {
+                        if (destroyed) {
+                            return;
+                        }
                         var retryDelay = 30000;
                         var errorMsg = t.errorTry;
                         
@@ -744,7 +787,7 @@
                             /* Prefer the exact number from this 429, then the structured throttle data, then a conservative 5 minutes - never hammer a throttled API every 30s */
                             retryDelay = 300000;
                             var match = e.detail ? e.detail.match(/available in (\d+)/) : null;
-                            var thr = window.spaceWidgetCurrentThrottle;
+                            var thr = currentThrottle;
                             if (match && match[1]) {
                                 retryDelay = (parseInt(match[1], 10) + 5) * 1000;
                             } else if (thr && thr.next_use_secs > 0) {
@@ -756,14 +799,14 @@
                         var cachedObj = readCache();
                         if (cachedObj && cachedObj.data) {
                             renderData(cachedObj.data);
-                            window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
+                            nextRefreshTime = new Date().getTime() + retryDelay;
                             scheduleFetch(retryDelay);
                             finishFetch();
                             return;
                         }
                         
                         showMessageState(t.errorLoad, errorMsg);
-                        window.spaceWidgetNextRefreshTime = new Date().getTime() + retryDelay;
+                        nextRefreshTime = new Date().getTime() + retryDelay;
                         scheduleFetch(retryDelay);
                         finishFetch();
                     } );
@@ -992,18 +1035,18 @@
                         coarseDateEl.style.display = 'none';
                         targetDate = new Date(launch.net).getTime();
                         updateTimer();
-                        if (window.spaceWidgetTimerInterval) {
-                            clearInterval(window.spaceWidgetTimerInterval);
+                        if (timerInterval) {
+                            clearInterval(timerInterval);
                         }
                         if (!isHold) {
-                            window.spaceWidgetTimerInterval = setInterval(updateTimer, 1000);
+                            timerInterval = setInterval(updateTimer, 1000);
                         }
                     } else {
                         timerEl.style.display = 'none';
                         coarseDateEl.style.display = 'block';
                         coarseDateEl.textContent = formatCoarseDate(launch.net, precisionId);
-                        if (window.spaceWidgetTimerInterval) {
-                            clearInterval(window.spaceWidgetTimerInterval);
+                        if (timerInterval) {
+                            clearInterval(timerInterval);
                         }
                     }
                 } else {
@@ -1076,13 +1119,13 @@
             /* Cache-first initialization: render from cache if within TTL, then fetch */
             var initCache = readCache();
             if (initCache && initCache.data) {
-                window.spaceWidgetLastFetchTime = initCache.ts;
-                window.spaceWidgetCurrentThrottle = readThrottle() || initCache.throttle || null;
+                lastFetchTime = initCache.ts;
+                currentThrottle = readThrottle() || initCache.throttle || null;
 
                 var matchedLaunch = renderData(initCache.data);
                 var now = new Date().getTime();
                 var age = now - (initCache.ts || 0);
-                var ttl = getDynamicTTL(matchedLaunch, window.spaceWidgetCurrentThrottle);
+                var ttl = getDynamicTTL(matchedLaunch, currentThrottle);
                 
                 var hasFuture = false;
                 if (initCache.data.results && initCache.data.results.length > 0) {
@@ -1095,11 +1138,11 @@
                 }
                 
                 if (age >= ttl || !hasFuture) {
-                    window.spaceWidgetNextRefreshTime = now;
+                    nextRefreshTime = now;
                     fetchLaunch();
                 } else {
                     var remaining = ttl - age;
-                    window.spaceWidgetNextRefreshTime = now + (remaining > 1000 ? remaining : 1000);
+                    nextRefreshTime = now + (remaining > 1000 ? remaining : 1000);
                     scheduleFetch(remaining > 1000 ? remaining : 1000);
                     updateMetaInfo();
                 }
