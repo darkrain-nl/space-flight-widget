@@ -5,6 +5,11 @@ All notable changes to the Space Flight Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.16] - 2026-07-06
+
+### Fixed
+- **Stable Control Pill**: The navigation/refresh control pill no longer shifts position between launches. It previously flipped between an inline and a wrapped position depending on whether the per-launch avatar thumbnail was shown (which changes the title column's width); the title now always fills the first line so the pill consistently wraps to its own line, right-aligned to the stable column edge, independent of the avatar, title text, and timer.
+
 ## [1.0.15] - 2026-07-05
 
 ### Fixed
