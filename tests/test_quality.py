@@ -1,7 +1,7 @@
-import unittest
 import os
 import re
 import sys
+import unittest
 
 # Base directory setup
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -9,7 +9,7 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 # Import the build script's own extraction/validation logic so the tests
 # enforce exactly the rules build.py enforces, instead of a drifting copy.
 sys.path.append(BASE_DIR)
-from build import clean_js_for_analysis, extract_scripts, validate_script  # noqa: E402
+from build import clean_js_for_analysis, extract_scripts, validate_script
 
 
 class TestWidgetQualityAndConstraints(unittest.TestCase):

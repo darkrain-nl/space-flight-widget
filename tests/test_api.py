@@ -1,8 +1,8 @@
-import unittest
-import urllib.request
-import urllib.error
 import json
 import os
+import unittest
+import urllib.error
+import urllib.request
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 FIXTURE_PATH = os.path.join(BASE_DIR, "tests", "fixtures", "launches_upcoming.json")
