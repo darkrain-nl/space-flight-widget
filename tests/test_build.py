@@ -1,6 +1,6 @@
-import unittest
-import sys
 import os
+import sys
+import unittest
 
 # Add parent directory to path so we can import build
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))

@@ -160,10 +160,8 @@ def validate_script(script, i):
     # expression, and a trailing ++/-- attaches to the next line.
     for lineno, raw_line in enumerate(script.split("\n"), 1):
         line = raw_line.strip()
-        if (
-            re.search(r"\b(?:return|break|continue|throw)$", line)
-            or line.endswith("++")
-            or line.endswith("--")
+        if re.search(r"\b(?:return|break|continue|throw)$", line) or line.endswith(
+            ("++", "--")
         ):
             raise ValueError(
                 f"Error: Line {lineno} of JavaScript block #{i} ends in a token "
