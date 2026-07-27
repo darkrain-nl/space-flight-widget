@@ -5,6 +5,12 @@ All notable changes to the Space Flight Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.18] - 2026-07-27
+
+### Fixed
+- **Stale Selection Keys**: A stored manual selection is now removed once its launch drops out of the widget's list entirely (it flew and aged out, or the day window moved past it), not only when the launch is still listed but too old. Previously such a key lingered in the browser profile indefinitely.
+- **Legacy Unscoped Key**: The pre-1.0.14 unscoped `space_selected_launch_id` key, which nothing has read or written since selections became configuration-scoped, is cleaned up on load.
+
 ## [1.0.17] - 2026-07-27
 
 ### Security
