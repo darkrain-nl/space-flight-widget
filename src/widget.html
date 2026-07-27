@@ -1,4 +1,4 @@
-<div id="space-countdown-widget" data-lang="en" data-version="1.0.16" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
+<div id="space-countdown-widget" data-lang="en" data-version="1.0.17" style="font-family: 'Inter', system-ui, sans-serif; background: rgba(15, 17, 26, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: clamp(0.75rem, 4%, 1.5rem); color: white; max-width: 700px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); box-sizing: border-box; margin: auto;">
     <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
         <div style="display: flex; align-items: center; gap: 1.5rem; flex: 1; min-width: 250px;">
             <img id="space-avatar" src="" style="display: none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); flex-shrink: 0;" alt="Rocket Thumbnail">
@@ -60,7 +60,7 @@
 
     <div id="space-attribution" style="margin-top: 1.5rem; font-size: 0.65rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.8rem;">
         <div id="space-meta-info" style="color: #94a3b8; text-align: left; font-family: inherit;">
-            <a id="space-version-link" href="https://darkrain-nl.github.io/space-flight-widget/" target="_blank" rel="noopener noreferrer" style="color: #94a3b8; text-decoration: none; transition: color 0.2s;">v1.0.16</a>
+            <a id="space-version-link" href="https://darkrain-nl.github.io/space-flight-widget/" target="_blank" rel="noopener noreferrer" style="color: #94a3b8; text-decoration: none; transition: color 0.2s;">v1.0.17</a>
             <span id="space-meta-text"></span>
         </div>
         <a id="space-attr-link" href="https://thespacedevs.com/" target="_blank" rel="noopener noreferrer" style="color: #94a3b8; text-decoration: none;">Data by The Space Devs</a>
@@ -208,7 +208,7 @@
                 } ;
             }
 
-            var WIDGET_VERSION = '1.0.16';
+            var WIDGET_VERSION = '1.0.17';
             /* Scope the manual-selection key to this widget's configuration so differently-configured widgets on the same origin do not steal each other's selection; identically-configured widgets intentionally share it (and the launch cache) */
             var SELECTED_LAUNCH_KEY = 'space_selected_launch_id_' + langCode + '_' + ALLOWED_ROCKETS.join('-') + '_' + MAX_DAYS;
             var matchedLaunches = [];
@@ -513,39 +513,92 @@
                 return 600000; /* 10 mins */
             }
 
-            /* Read the structured cache from localStorage */
+            /* localStorage is shared with every other script on the embedding page (a forum, a blog), so both cached blobs are untrusted input: anything read back is validated and coerced here before it can reach the DOM or the scheduler */
+            function isObject(value) {
+                return value !== null && typeof value === 'object';
+            }
+
+            function toNonNegNumber(value, fallback) {
+                var n = Number(value);
+                if (!isFinite(n) || n < 0) {
+                    return fallback;
+                }
+                return n;
+            }
+
+            /* Read the structured cache from localStorage, rejecting anything that is not a well-formed launch payload for at least this widget's day window */
             function readCache() {
+                var parsed;
                 try {
                     var raw = localStorage.getItem(CACHE_KEY);
                     if (!raw) return null;
-                    var parsed = JSON.parse(raw);
-                    if (parsed && parsed.results && !parsed.data) {
-                        return { data: parsed, ts: 0, throttle: null };
+                    parsed = JSON.parse(raw);
+                } catch (e) {
+                    return null;
+                }
+                if (!isObject(parsed) || !isObject(parsed.data) || !Array.isArray(parsed.data.results) ) {
+                    return null;
+                }
+                /* The payload is bounded by net__lte, so a cache written by a shorter-window widget on this origin is a subset of what this one must show - refetch instead of silently rendering a truncated list */
+                var cachedDays = Number(parsed.days);
+                if (!isFinite(cachedDays) || cachedDays < MAX_DAYS) {
+                    return null;
+                }
+                /* A missing, non-numeric or future timestamp would make the entry look arbitrarily fresh; 0 marks it stale so the widget refetches */
+                var ts = Number(parsed.ts);
+                var now = new Date().getTime();
+                if (!isFinite(ts) || ts <= 0 || ts > now) {
+                    ts = 0;
+                }
+                var results = [];
+                for (var ci = 0; ci < parsed.data.results.length; ci++) {
+                    if (isObject(parsed.data.results[ci]) ) {
+                        results.push(parsed.data.results[ci]);
                     }
-                    if (parsed && parsed.data) {
-                        return parsed;
-                    }
-                } catch (e) {}
-                return null;
+                }
+                return { data: { results: results }, ts: ts };
             }
 
-            /* Write structured cache to localStorage */
+            /* Write structured cache to localStorage; only the results array is kept, tagged with the day window it was fetched for */
             function writeCache(data) {
+                if (!isObject(data) || !Array.isArray(data.results) ) {
+                    return;
+                }
+                var payload;
                 try {
-                    var cacheObj = {
-                        data: data,
-                        ts: new Date().getTime()
-                    };
-                    localStorage.setItem(CACHE_KEY, JSON.stringify(cacheObj) );
-                } catch (e) {}
+                    payload = JSON.stringify({ data: { results: data.results }, ts: new Date().getTime(), days: MAX_DAYS } );
+                } catch (e) {
+                    return;
+                }
+                try {
+                    localStorage.setItem(CACHE_KEY, payload);
+                } catch (e) {
+                    /* Most likely the origin's quota is full: drop our own stale entry and try once more, otherwise give up silently and keep serving from memory */
+                    try {
+                        localStorage.removeItem(CACHE_KEY);
+                        localStorage.setItem(CACHE_KEY, payload);
+                    } catch (e2) {}
+                }
             }
 
-            /* Throttle status lives under its own small key so updating it never requires re-serializing the whole launch payload; readers fall back to the throttle field of pre-split cache blobs */
+            /* Coerce throttle counters to finite non-negative numbers: they drive refresh scheduling, and a string or absurd value from a rewritten cache entry (or an API change) would otherwise corrupt the delay arithmetic */
+            function sanitizeThrottle(raw) {
+                if (!isObject(raw) ) {
+                    return null;
+                }
+                return {
+                    your_request_limit: toNonNegNumber(raw.your_request_limit, 15),
+                    current_use: toNonNegNumber(raw.current_use, 0),
+                    next_use_secs: toNonNegNumber(raw.next_use_secs, 0)
+                };
+            }
+
+            /* Throttle status lives under its own small key so updating it never requires re-serializing the whole launch payload */
             function readThrottle() {
                 try {
                     var raw = localStorage.getItem(THROTTLE_KEY);
                     if (raw) {
-                        return JSON.parse(raw);
+                        return sanitizeThrottle(JSON.parse(raw) );
                     }
                 } catch (e) {}
                 return null;
@@ -590,6 +643,36 @@
                     return t.decadeOf.replace('{year}', year);
                 }
                 return String(year);
+            }
+
+            /* Thumbnail URLs are the only value from the payload that becomes a network request instead of text, and the payload may have come from a cache entry any script on the embedding origin can rewrite. On a public forum an unvalidated URL would leak every reader's IP and user agent to whoever picked it, so only https URLs on a known Space Devs host are accepted.
+               The CDN buckets are listed in full rather than by domain suffix: DigitalOcean Spaces is shared storage where any tenant owns a subdomain of digitaloceanspaces.com, so a suffix match would let an unrelated bucket through.
+               If The Space Devs moves its media hosting, add the new host here - an unrecognised host only means the avatar stays hidden, the rest of the widget is unaffected */
+            var IMAGE_HOSTS = ['thespacedevs-prod.nyc3.digitaloceanspaces.com', 'thespacedevs-dev.nyc3.digitaloceanspaces.com'];
+            /* The Space Devs own every subdomain of their own domain, so matching by suffix is safe here */
+            var IMAGE_HOST_SUFFIXES = ['.thespacedevs.com'];
+
+            function safeImageUrl(value) {
+                if (typeof value !== 'string') {
+                    return '';
+                }
+                var m = value.match(/^https:\/\/([a-z0-9.-]+)(?::\d+)?(?:[/?#]|$)/i);
+                if (!m) {
+                    return '';
+                }
+                var host = m[1].toLowerCase();
+                for (var hi = 0; hi < IMAGE_HOSTS.length; hi++) {
+                    if (host === IMAGE_HOSTS[hi]) {
+                        return value;
+                    }
+                }
+                for (var si = 0; si < IMAGE_HOST_SUFFIXES.length; si++) {
+                    var suffix = IMAGE_HOST_SUFFIXES[si];
+                    if (host.length > suffix.length && host.slice(host.length - suffix.length) === suffix) {
+                        return value;
+                    }
+                }
+                return '';
             }
 
             /* Wrapper to add a timeout to fetch calls (fetch has no native timeout) */
@@ -640,6 +723,25 @@
                 }
             }
 
+            /* Every refresh delay ultimately comes from data we do not control (the cached throttle counters, the API, or a 429 body), and setTimeout treats NaN or anything past 2^31-1 ms as "fire immediately" - which would turn one bad value into a fetch loop hammering the shared API quota. Clamp to a sane window instead */
+            var MIN_FETCH_DELAY = 1000;
+            var MAX_FETCH_DELAY = 3600000;
+            var FALLBACK_FETCH_DELAY = 300000;
+
+            function clampDelay(delayMs) {
+                var n = Number(delayMs);
+                if (!isFinite(n) ) {
+                    return FALLBACK_FETCH_DELAY;
+                }
+                if (n < MIN_FETCH_DELAY) {
+                    return MIN_FETCH_DELAY;
+                }
+                if (n > MAX_FETCH_DELAY) {
+                    return MAX_FETCH_DELAY;
+                }
+                return n;
+            }
+
             /* Schedule the next fetchLaunch, always clearing any previously scheduled one so only a single refresh loop can exist; a destroyed instance never reschedules (kills zombie loops from in-flight fetches) */
             function scheduleFetch(delayMs) {
                 if (fetchTimeout) {
@@ -648,7 +750,7 @@
                 if (destroyed) {
                     return;
                 }
-                fetchTimeout = setTimeout(fetchLaunch, delayMs);
+                fetchTimeout = setTimeout(fetchLaunch, clampDelay(delayMs) );
             }
 
             /* Common cleanup for every fetch exit path */
@@ -703,7 +805,11 @@
                         if (destroyed) {
                             return;
                         }
-                        var throttleObj = throttleData;
+                        var throttleObj = sanitizeThrottle(throttleData);
+                        if (!throttleObj) {
+                            doFetchLaunch(null);
+                            return;
+                        }
                         currentThrottle = throttleObj;
                         writeThrottle(throttleObj);
 
@@ -729,7 +835,7 @@
                                     }
                                 }, 5000);
                             }
-                            var retryDelay = (throttleObj.next_use_secs > 0) ? (throttleObj.next_use_secs + 5) * 1000 : 300000;
+                            var retryDelay = clampDelay((throttleObj.next_use_secs > 0) ? (throttleObj.next_use_secs + 5) * 1000 : 300000);
                             nextRefreshTime = new Date().getTime() + retryDelay;
                             scheduleFetch(retryDelay);
                             finishFetch();
@@ -770,7 +876,7 @@
 
                         var matchedLaunch = renderData(data);
 
-                        var interval = getDynamicTTL(matchedLaunch, throttleObj || readThrottle());
+                        var interval = clampDelay(getDynamicTTL(matchedLaunch, throttleObj || readThrottle() ) );
                         nextRefreshTime = new Date().getTime() + interval;
 
                         scheduleFetch(interval);
@@ -784,9 +890,9 @@
                         var errorMsg = t.errorTry;
                         
                         if (e && e.isRateLimit) {
-                            /* Prefer the exact number from this 429, then the structured throttle data, then a conservative 5 minutes - never hammer a throttled API every 30s */
+                            /* Prefer the exact number from this 429, then the structured throttle data, then a conservative 5 minutes - never hammer a throttled API every 30s. The detail field is whatever the server sent, so check the type before matching on it */
                             retryDelay = 300000;
-                            var match = e.detail ? e.detail.match(/available in (\d+)/) : null;
+                            var match = (typeof e.detail === 'string') ? e.detail.match(/available in (\d+)/) : null;
                             var thr = currentThrottle;
                             if (match && match[1]) {
                                 retryDelay = (parseInt(match[1], 10) + 5) * 1000;
@@ -795,7 +901,8 @@
                             }
                             errorMsg = t.errorRateLimit || "Rate limit exceeded. We will try again later.";
                         }
-                        
+                        retryDelay = clampDelay(retryDelay);
+
                         var cachedObj = readCache();
                         if (cachedObj && cachedObj.data) {
                             renderData(cachedObj.data);
@@ -996,10 +1103,13 @@
                         statusEl.style.borderColor = 'rgba(245, 158, 11, 0.3)';
                     }
 
-                    if (launch.image && (launch.image.thumbnail_url || launch.image.image_url)) {
-                        avatarEl.src = String(launch.image.thumbnail_url || launch.image.image_url);
+                    var imgUrl = isObject(launch.image) ? (safeImageUrl(launch.image.thumbnail_url) || safeImageUrl(launch.image.image_url) ) : '';
+                    if (imgUrl) {
+                        avatarEl.src = imgUrl;
                         avatarEl.style.display = 'block';
                     } else {
+                        /* Drop the attribute rather than blanking it: an empty src makes some browsers re-request the page itself */
+                        avatarEl.removeAttribute('src');
                         avatarEl.style.display = 'none';
                     }
 
@@ -1120,7 +1230,7 @@
             var initCache = readCache();
             if (initCache && initCache.data) {
                 lastFetchTime = initCache.ts;
-                currentThrottle = readThrottle() || initCache.throttle || null;
+                currentThrottle = readThrottle();
 
                 var matchedLaunch = renderData(initCache.data);
                 var now = new Date().getTime();
@@ -1141,9 +1251,9 @@
                     nextRefreshTime = now;
                     fetchLaunch();
                 } else {
-                    var remaining = ttl - age;
-                    nextRefreshTime = now + (remaining > 1000 ? remaining : 1000);
-                    scheduleFetch(remaining > 1000 ? remaining : 1000);
+                    var remaining = clampDelay(ttl - age);
+                    nextRefreshTime = now + remaining;
+                    scheduleFetch(remaining);
                     updateMetaInfo();
                 }
             } else {

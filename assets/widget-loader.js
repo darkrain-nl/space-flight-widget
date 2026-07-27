@@ -31,7 +31,10 @@
             attrs += ' data-rockets="' + escapeAttr(options.rockets) + '"';
         }
         attrs += ' data-days="' + escapeAttr(options.days || 7) + '"';
-        return template.replace('data-lang="en"', attrs);
+        /* Function replacement, not a string: a literal replacement would let a
+           '$&' or "$'" in an option value expand to surrounding template markup
+           and splice a second copy of the widget into the opening tag. */
+        return template.replace('data-lang="en"', function() { return attrs; });
     }
 
     /* Parse the widget HTML via DOMParser (avoiding innerHTML), apply the
