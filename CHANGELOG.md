@@ -5,6 +5,20 @@ All notable changes to the Space Flight Widget will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.17] - 2026-07-27
+
+### Security
+- **Untrusted Local Cache**: `localStorage` is shared with every other script on the page the widget is pasted into, so the cached launch payload and throttle counters are now validated instead of trusted. The cache is rejected unless it is a well-formed results array, its timestamp is a real past time, and it covers at least this widget's day window; throttle counters are coerced to finite non-negative numbers.
+- **Thumbnail Host Allow-List**: Avatar image URLs are only used when they are `https` on a known Space Devs host — the two media buckets by full hostname, or their own domain by suffix. A tampered cache entry can no longer make a widget on a public forum request an attacker-chosen URL, which would leak every reader's IP and user agent. The CDN buckets are matched in full because DigitalOcean Spaces is shared storage where any tenant owns a subdomain. An unrecognised host leaves the avatar hidden and affects nothing else.
+- **Bounded Refresh Scheduling**: Every refresh delay is clamped to between 1 second and 1 hour. A `NaN` or out-of-range value from the cached throttle data or a 429 response body previously reached `setTimeout` unchecked, where it fires immediately and turns one bad value into a fetch loop against the shared API quota.
+- **Safer Template Configuration**: The preview/embed loader injects configuration attributes with a function replacement, so a `$`-sequence in an option value cannot expand to surrounding template markup.
+
+### Fixed
+- **Cross-Widget Cache Truncation**: The cached payload is bounded by the `data-days` window it was fetched for, so a widget with a longer window no longer renders a shorter-window widget's truncated results; it refetches instead.
+- **Rate-Limit Parsing Crash**: A non-string `detail` field in a 429 response no longer throws inside the error handler, which left the widget without a scheduled refresh.
+- **Cache Write Under Quota Pressure**: A failed cache write now drops the widget's own stale entry and retries once instead of silently giving up.
+- **Leftover Simulated Quota**: Toggling the preview page's launch simulation clears the stored throttle reading as well as the launch cache, so the simulated "full quota" response no longer survives into a real session.
+
 ## [1.0.16] - 2026-07-06
 
 ### Fixed
